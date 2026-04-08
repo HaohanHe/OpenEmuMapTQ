@@ -24,15 +24,17 @@ export const DigitChallenge: React.FC<DigitChallengeProps> = ({
   const placeholderCount = placeholders.length;
 
   useEffect(() => {
-    if (selectedAnswer && !isEditing) {
+    // 当题目切换时，重置所有状态
+    setIsEditing(false);
+    if (selectedAnswer) {
       const digits = selectedAnswer.split('');
       setInput(digits);
       setUsedDigits(digits);
-    } else if (!selectedAnswer && !isEditing) {
+    } else {
       setInput([]);
       setUsedDigits([]);
     }
-  }, [selectedAnswer, isEditing]);
+  }, [selectedAnswer]);
 
   const validateAnswer = (inputDigits: string[]) => {
     let equationStr = equation;
