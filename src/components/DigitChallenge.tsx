@@ -42,21 +42,25 @@ export const DigitChallenge: React.FC<DigitChallengeProps> = ({
       equationStr = equationStr.replace('?', digit);
     });
     
-    let expression = '';
     try {
       // 计算结果
       const parts = equationStr.split('=');
-      expression = parts[0].trim();
+      const expression = parts[0].trim();
       const targetStr = parts[1].trim();
       
       // 替换中文乘号为英文乘号
-      expression = expression.replace(/×/g, '*');
+      const safeExpression = expression.replace(/×/g, '*');
       
-      const result = eval(expression);
+      // 安全计算 - 只允许数字和基本运算符
+      if (!/^[0-9+\-*/()\s]+$/.test(safeExpression)) {
+        return false;
+      }
+      
+      const result = eval(safeExpression);
       const target = parseInt(targetStr);
       return result === target;
     } catch (error) {
-      console.error('计算错误:', error, '表达式:', expression);
+      console.error('计算错误:', error);
       return false;
     }
   };
