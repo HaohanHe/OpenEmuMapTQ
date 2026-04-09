@@ -8,7 +8,7 @@ import { Brain, Book, Calculator, Globe, Sun, Moon, ChevronDown, PlayCircle, Che
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { startQuiz, isExamMode, toggleExamMode } = useQuizStore();
-  const [isAdaptiveMode, setIsAdaptiveMode] = React.useState(false);
+  const [isAdaptiveMode, setIsAdaptiveMode] = React.useState(true);
 
   const handleStartQuiz = (type: string) => {
     startQuiz(type as QuizType, isExamMode, isAdaptiveMode);

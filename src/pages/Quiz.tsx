@@ -41,7 +41,7 @@ const Quiz: React.FC = () => {
   // 当类型变化时，自动开始测试
   useEffect(() => {
     if (type && questions.length === 0) {
-      startQuiz(type as QuizType, false);
+      startQuiz(type as QuizType, false, type === 'random');
     }
   }, [type, questions.length, startQuiz]);
 
