@@ -325,8 +325,8 @@ const Quiz: React.FC = () => {
             
             <button
               onClick={nextQuestion}
-              disabled={isLastQuestion || !selectedAnswer}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${(isLastQuestion || !selectedAnswer) ? 'bg-primary-800 text-primary-500 cursor-not-allowed' : 'bg-primary-700 hover:bg-primary-600'}`}
+              disabled={!userAnswers.some(ua => ua.questionId === currentQuestion.id)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${(!userAnswers.some(ua => ua.questionId === currentQuestion.id)) ? 'bg-primary-800 text-primary-500 cursor-not-allowed' : 'bg-primary-700 hover:bg-primary-600'}`}
             >
               <span>{isLastQuestion ? (language === 'zh' ? '完成' : 'Complete') : (language === 'zh' ? '下一题' : 'Next')}</span>
               <ArrowRight className="w-4 h-4" />
