@@ -2,15 +2,16 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuizStore } from '@/store/quizStore';
 import { useLanguageStore } from '@/store/languageStore';
-import { Brain, Calculator, Book, PlayCircle, ChevronRight, Globe } from 'lucide-react';
+import { QuizType } from '@/types';
+import { Brain, Book, Calculator, Globe, Sun, Moon, ChevronDown, PlayCircle, ChevronRight } from 'lucide-react';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { startQuiz, isExamMode, toggleExamMode } = useQuizStore();
-  const [isAdaptiveMode, setIsAdaptiveMode] = React.useState(false);
+  const [isAdaptiveMode, setIsAdaptiveMode] = React.useState(true);
 
   const handleStartQuiz = (type: string) => {
-    startQuiz(type, isExamMode, isAdaptiveMode);
+    startQuiz(type as QuizType, isExamMode, isAdaptiveMode);
     navigate(`/quiz/${type}`);
   };
 

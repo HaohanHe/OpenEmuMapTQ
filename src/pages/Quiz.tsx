@@ -2,6 +2,7 @@ import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuizStore } from '@/store/quizStore';
 import { useLanguageStore } from '@/store/languageStore';
+import { QuizType } from '@/types';
 import { ArrowLeft, ArrowRight, Check, Clock, AlertCircle, Home, Brain } from 'lucide-react';
 
 const SwitchChallenge = lazy(() => import('@/components/SwitchChallenge'));
@@ -40,7 +41,7 @@ const Quiz: React.FC = () => {
   // 当类型变化时，自动开始测试
   useEffect(() => {
     if (type && questions.length === 0) {
-      startQuiz(type, false);
+      startQuiz(type as QuizType, false, type === 'random');
     }
   }, [type, questions.length, startQuiz]);
 
@@ -222,7 +223,6 @@ const Quiz: React.FC = () => {
               {currentQuestion.scalesIxData && (
                 <ScalesIx
                   allShapes={currentQuestion.scalesIxData.allShapes}
-                  oddOneOut={currentQuestion.scalesIxData.oddOneOut}
                   oddOneOutIndex={currentQuestion.scalesIxData.oddOneOutIndex}
                   selectedAnswer={selectedAnswer ? parseInt(selectedAnswer) : undefined}
                   onSelect={(index) => handleAnswerSelect(index.toString())}
@@ -233,7 +233,6 @@ const Quiz: React.FC = () => {
               {currentQuestion.digitChallengeData && (
                 <DigitChallenge
                   equation={currentQuestion.digitChallengeData.equation}
-                  options={currentQuestion.options}
                   correctAnswer={currentQuestion.correctAnswer}
                   selectedAnswer={selectedAnswer}
                   onSelect={handleAnswerSelect}
@@ -326,8 +325,8 @@ const Quiz: React.FC = () => {
             
             <button
               onClick={nextQuestion}
-              disabled={isLastQuestion || !selectedAnswer}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${(isLastQuestion || !selectedAnswer) ? 'bg-primary-800 text-primary-500 cursor-not-allowed' : 'bg-primary-700 hover:bg-primary-600'}`}
+              disabled={!userAnswers.some(ua => ua.questionId === currentQuestion.id)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${(!userAnswers.some(ua => ua.questionId === currentQuestion.id)) ? 'bg-primary-800 text-primary-500 cursor-not-allowed' : 'bg-primary-700 hover:bg-primary-600'}`}
             >
               <span>{isLastQuestion ? (language === 'zh' ? '完成' : 'Complete') : (language === 'zh' ? '下一题' : 'Next')}</span>
               <ArrowRight className="w-4 h-4" />

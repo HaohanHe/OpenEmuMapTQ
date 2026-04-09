@@ -240,7 +240,7 @@ export const useQuizStore = create<QuizState>()(
               console.warn('No answer found for current question');
             }
           } else {
-            if (currentQuestionIndex < questions.length - 1) {
+            if (currentQuestionIndex >= 0 && currentQuestionIndex < questions.length - 1) {
               set({ currentQuestionIndex: currentQuestionIndex + 1 });
             }
           }
