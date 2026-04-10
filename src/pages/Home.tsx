@@ -128,7 +128,7 @@ const Home: React.FC = () => {
 
             {/* Adaptive Mode Toggle */}
             <div className="flex items-center">
-              <span className={`mr-4 text-sm font-medium ${isAdaptiveMode ? 'text-primary-300' : 'text-white'}`}>{language === 'zh' ? '标准模式' : 'Standard Mode'}</span>
+              <span className={`mr-4 text-sm font-medium ${!isAdaptiveMode ? 'text-primary-300' : 'text-white'}`}>{language === 'zh' ? '标准模式' : 'Standard Mode'}</span>
               <button
                 onClick={() => setIsAdaptiveMode(!isAdaptiveMode)}
                 className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 focus:ring-offset-primary-900 ${
