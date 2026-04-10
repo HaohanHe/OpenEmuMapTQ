@@ -57,28 +57,22 @@ export const SwitchChallenge: React.FC<SwitchChallengeProps> = ({
   };
 
   const getButtonClass = (option: string) => {
-    if (!selectedAnswer) {
-      return 'bg-gray-700 border-gray-600 hover:bg-gray-600';
-    }
-    if (option === correctAnswer) {
-      return 'bg-yellow-400/30 border-yellow-500 text-yellow-300';
-    }
-    if (option === selectedAnswer && option !== correctAnswer) {
-      return 'bg-error/20 border-error text-error';
+    if (option === selectedAnswer) {
+      return 'bg-blue-500/30 border-blue-400 text-blue-300';
     }
     return 'bg-gray-800/60 border-gray-700 hover:bg-gray-700';
   };
 
   const getFirstCodeClass = (option: string) => {
     if (option === selectedFirstCode) {
-      return 'bg-gray-600 border-gray-500';
+      return 'bg-blue-500/30 border-blue-400 text-blue-300';
     }
     return 'bg-gray-800/60 border-gray-700 hover:bg-gray-700';
   };
 
   const getSecondCodeClass = (option: string) => {
     if (option === selectedSecondCode) {
-      return 'bg-gray-600 border-gray-500';
+      return 'bg-blue-500/30 border-blue-400 text-blue-300';
     }
     return 'bg-gray-800/60 border-gray-700 hover:bg-gray-700';
   };

@@ -22,22 +22,10 @@ export const ScalesIx: React.FC<ScalesIxProps> = ({
   };
 
   const getButtonClass = (index: number) => {
-    const isSelected = selectedAnswer === index;
-    const isCorrect = index === oddOneOutIndex;
-    
-    if (selectedAnswer === undefined) {
-      return 'bg-gray-800/60 border-gray-600 hover:bg-gray-700 hover:border-gray-500';
+    if (selectedAnswer === index) {
+      return 'bg-blue-500/30 border-blue-400 text-blue-300';
     }
-    
-    if (isCorrect) {
-      return 'bg-yellow-400/30 border-yellow-500 text-yellow-300';
-    }
-    
-    if (isSelected && !isCorrect) {
-      return 'bg-error/20 border-error text-error';
-    }
-    
-    return 'bg-gray-800/40 border-gray-700';
+    return 'bg-gray-800/60 border-gray-600 hover:bg-gray-700 hover:border-gray-500';
   };
 
   return (

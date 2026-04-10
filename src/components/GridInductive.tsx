@@ -40,21 +40,16 @@ export const GridInductive: React.FC<GridInductiveProps> = ({
     if (newSelected.length === 2) {
       const answer = newSelected.sort((a, b) => a - b).join(',');
       onSelect?.(answer);
+    } else {
+      onSelect?.('');
     }
   };
 
   const getGridClass = (index: number) => {
-    if (selectedAnswer) {
-      const correctIndices = correctAnswer.split(',').map(Number);
-      if (correctIndices.includes(index)) {
-        return 'border-yellow-500 bg-yellow-400/20';
-      } else if (selectedGrids.includes(index)) {
-        return 'border-error bg-error/20';
-      }
-    } else if (selectedGrids.includes(index)) {
-      return 'border-blue-400 bg-blue-500/20';
+    if (selectedGrids.includes(index)) {
+      return 'border-blue-400 bg-blue-500/30 text-blue-300 shadow-[0_0_15px_rgba(59,130,246,0.3)]';
     }
-    return 'border-gray-600 bg-gray-800/60';
+    return 'border-gray-600 bg-gray-800/60 hover:bg-gray-700/80 transition-colors';
   };
 
   const getShapeColor = (shape: string) => {

@@ -25,16 +25,10 @@ export const GridChallenge: React.FC<GridChallengeProps> = ({
   };
 
   const getButtonClass = (shape: string) => {
-    if (!selectedAnswer) {
-      return 'bg-primary-800/80 border-primary-600 hover:bg-primary-800';
+    if (shape === selectedAnswer) {
+      return 'bg-blue-500/30 border-blue-400 text-blue-300';
     }
-    if (shape === correctAnswer) {
-      return 'bg-success/20 border-success text-success';
-    }
-    if (shape === selectedAnswer && shape !== correctAnswer) {
-      return 'bg-error/20 border-error text-error';
-    }
-    return 'bg-primary-800/50 border-primary-700 hover:bg-primary-800';
+    return 'bg-primary-800/80 border-primary-600 hover:bg-primary-800';
   };
 
   const getShapeColor = (shape: string) => {
