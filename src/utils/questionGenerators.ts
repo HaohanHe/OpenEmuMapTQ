@@ -404,24 +404,25 @@ export const generateApReasoning = (count: number = 20): Question[] => {
       // 设定的真实大小顺序为 items[0] > items[1] > items[2] > items[3] > items[4] > items[5]
       const [A, B, C, D, E, F] = items;
       
-      content = `大楼里有六个会议室：${items.sort().join('、')}。\n\n• ${C} 比 ${D} 大。\n• ${B} 比 ${C} 大。\n• 有一个房间比 ${B} 小，但比 ${C} 大。\n• ${A} 比 ${B} 和 ${E} 都大。`;
+      content = `大楼里有六个会议室：${items.sort().join('、')}。\n\n• ${D} 比 ${E} 大。\n• ${B} 比 ${D} 大。\n• 有一个房间比 ${B} 小，但比 ${D} 大。\n• ${A} 比 ${B} 和 ${C} 都大。`;
       questionText = '根据以上信息，以下哪项是从大到小的可能排序？';
       
-      const correctOrder = `${A}, ${B}, ${E}, ${C}, ${D}, ${F}`; // 只要符合条件即可，这里构造一个绝对正确的
-      const wrong1 = `${F}, ${E}, ${C}, ${A}, ${B}, ${D}`;
-      const wrong2 = `${D}, ${B}, ${F}, ${C}, ${A}, ${E}`;
-      const wrong3 = `${A}, ${B}, ${E}, ${C}, ${F}, ${D}`; // 让F大于D其实也可以，但为了单选，我们微调选项
-      const wrong4 = `${B}, ${A}, ${D}, ${C}, ${F}, ${E}`;
+      const correctOrder = `${A}, ${B}, ${C}, ${D}, ${E}, ${F}`;
       
       options = shuffleArray([
-        `${A}, ${B}, ${E}, ${C}, ${D}, ${F}`,
+        correctOrder,
         `${F}, ${E}, ${C}, ${A}, ${B}, ${D}`,
         `${D}, ${B}, ${F}, ${C}, ${A}, ${E}`,
         `${B}, ${A}, ${D}, ${C}, ${F}, ${E}`,
         `${A}, ${F}, ${B}, ${D}, ${C}, ${E}`
       ]);
-      correctAnswer = `${A}, ${B}, ${E}, ${C}, ${D}, ${F}`;
-      explanation = `根据条件，${A}最大，${B}大于${C}，${C}大于${D}，${A}大于${E}。唯一的有效顺序是 ${correctAnswer}。`;
+      correctAnswer = correctOrder;
+      explanation = `解析：
+1. 根据“${D} 比 ${E} 大”，得知 ${D} > ${E}。
+2. 根据“${B} 比 ${D} 大”，得知 ${B} > ${D}。
+3. 根据“有一个房间比 ${B} 小，但比 ${D} 大”，说明 ${B} 和 ${D} 之间至少有一个房间，即 ${C} (因为 ${A} 是最大的)。
+4. 根据“${A} 比 ${B} 和 ${C} 都大”，得知 ${A} > ${B} 且 ${A} > ${C}。
+结合以上线索，唯一完全符合所有规则的顺序是：${correctOrder}。`;
 
     } else if (templateType === 3) {
       // 排班问题
@@ -442,7 +443,24 @@ export const generateApReasoning = (count: number = 20): Question[] => {
         `${n6},${n3},${n1},${n2},${n4},${n5}`
       ]);
       correctAnswer = correctOrder;
-      explanation = `分析规则可知，顺序必须满足：${n3}->${n2}->${n1}->${n4}，并且 ${n6}->${n5}。同时 ${n1} 和 ${n6} 不能相邻。选项 ${correctOrder} 完美符合所有条件。`;
+      explanation = `解析：
+规则梳理：
+1. ${n1} < ${n4}
+2. ${n3} < ${n2}
+3. ${n2} < ${n1}
+4. ${n6} < ${n5}
+5. ${n1} 和 ${n6} 不能相邻
+
+结合前三条规则，形成一条清晰的时间链：${n3} < ${n2} < ${n1} < ${n4}。
+再结合第四条规则：${n6} < ${n5}。
+检查选项 ${correctOrder}：
+位置：1.${n6}, 2.${n3}, 3.${n5}, 4.${n2}, 5.${n1}, 6.${n4}
+- ${n1}(第5) 在 ${n4}(第6) 之前 (符合)
+- ${n3}(第2) 在 ${n2}(第4) 之前 (符合)
+- ${n2}(第4) 在 ${n1}(第5) 之前 (符合)
+- ${n5}(第3) 在 ${n6}(第1) 之后 (符合)
+- ${n1}(第5) 和 ${n6}(第1) 不相邻 (符合)
+完美满足所有条件。`;
 
     } else if (templateType === 4) {
       // 充分必要条件 (找错误项)
