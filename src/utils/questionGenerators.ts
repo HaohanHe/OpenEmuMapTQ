@@ -355,6 +355,149 @@ export const generateGridInductive = (count: number = 20): Question[] => {
 };
 
 /**
+ * 生成 Aon AP Reasoning (逻辑前提与结论推理测试) 题目
+ */
+export const generateApReasoning = (count: number = 20): Question[] => {
+  const questions: Question[] = [];
+
+  // AP Reasoning 属于高度结构化的逻辑题，分为不同类型的逻辑模板
+  // 1. 集合重叠问题 (Some A are B -> Some B are A)
+  // 2. 排序问题 (A > B, B > C -> A > C)
+  // 3. 排班问题 (A before B, C after D)
+  // 4. 充分必要条件 (If A then B, A is true -> B is true)
+  // 5. 互斥集合 (All A are B, No C are B -> Some A are not C)
+
+  const names = ['Jordan', 'Alex', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Sam', 'Jamie', 'Charlie', 'Avery'];
+  const companies = ['Tee-Tech', 'BrightPath', 'Alpha Corp', 'Beta Inc', 'Gamma LLC', 'Delta Group'];
+  
+  for (let i = 0; i < count; i++) {
+    const difficulty = getRandomInt(1, 5);
+    const templateType = getRandomInt(1, 5);
+    
+    let content = '';
+    let options: string[] = [];
+    let correctAnswer = '';
+    let explanation = '';
+    let questionText = '根据以上信息，下列哪项陈述必然正确？';
+
+    if (templateType === 1) {
+      // 集合重叠问题 (Some A are B -> Some B are A)
+      const groups1 = ['上白班的员工', '在研发部的员工', '有五年以上经验的员工', '负责北美市场的销售'];
+      const groups2 = ['上双班', '负责测试工作', '会说法语', '有MBA学位'];
+      const g1 = groups1[getRandomInt(0, groups1.length - 1)];
+      const g2 = groups2[getRandomInt(0, groups2.length - 1)];
+      
+      content = `一些${g1}也${g2}。`;
+      options = [
+        `所有${g1}都${g2}。`,
+        `一些${g1}不${g2}。`,
+        `没有${g1}${g2}。`,
+        `一些${g2}的员工不${g1}。`,
+        `一些${g2}的员工也${g1}。`
+      ];
+      correctAnswer = `一些${g2}的员工也${g1}。`;
+      explanation = `题目说明“一些${g1}也${g2}”，这意味着这两个群体之间有交集。因此必然有一些${g2}的员工也${g1}。`;
+      
+    } else if (templateType === 2) {
+      // 排序问题
+      const items = shuffleArray(['G', 'H', 'I', 'J', 'K', 'L']);
+      // 设定的真实大小顺序为 items[0] > items[1] > items[2] > items[3] > items[4] > items[5]
+      const [A, B, C, D, E, F] = items;
+      
+      content = `大楼里有六个会议室：${items.sort().join('、')}。\n\n• ${C} 比 ${D} 大。\n• ${B} 比 ${C} 大。\n• 有一个房间比 ${B} 小，但比 ${C} 大。\n• ${A} 比 ${B} 和 ${E} 都大。`;
+      questionText = '根据以上信息，以下哪项是从大到小的可能排序？';
+      
+      const correctOrder = `${A}, ${B}, ${E}, ${C}, ${D}, ${F}`; // 只要符合条件即可，这里构造一个绝对正确的
+      const wrong1 = `${F}, ${E}, ${C}, ${A}, ${B}, ${D}`;
+      const wrong2 = `${D}, ${B}, ${F}, ${C}, ${A}, ${E}`;
+      const wrong3 = `${A}, ${B}, ${E}, ${C}, ${F}, ${D}`; // 让F大于D其实也可以，但为了单选，我们微调选项
+      const wrong4 = `${B}, ${A}, ${D}, ${C}, ${F}, ${E}`;
+      
+      options = shuffleArray([
+        `${A}, ${B}, ${E}, ${C}, ${D}, ${F}`,
+        `${F}, ${E}, ${C}, ${A}, ${B}, ${D}`,
+        `${D}, ${B}, ${F}, ${C}, ${A}, ${E}`,
+        `${B}, ${A}, ${D}, ${C}, ${F}, ${E}`,
+        `${A}, ${F}, ${B}, ${D}, ${C}, ${E}`
+      ]);
+      correctAnswer = `${A}, ${B}, ${E}, ${C}, ${D}, ${F}`;
+      explanation = `根据条件，${A}最大，${B}大于${C}，${C}大于${D}，${A}大于${E}。唯一的有效顺序是 ${correctAnswer}。`;
+
+    } else if (templateType === 3) {
+      // 排班问题
+      const nurses = shuffleArray(['C', 'D', 'E', 'F', 'G', 'H']);
+      const [n1, n2, n3, n4, n5, n6] = nurses;
+      // 真实顺序: n6, n3, n5, n2, n1, n4
+      
+      content = `诊所有6名护士，他们的用餐时间必须安排好：${nurses.sort().join('、')}。\n\n规则如下：\n• ${n1} 必须在 ${n4} 之前用餐。\n• ${n3} 必须在 ${n2} 之前用餐。\n• ${n2} 必须在 ${n1} 之前用餐。\n• ${n5} 必须在 ${n6} 之后用餐。\n• ${n1} 不能紧挨着 ${n6} 用餐。`;
+      questionText = '根据这些规则，以下哪项是可接受的用餐顺序？';
+      
+      const correctOrder = `${n6},${n3},${n5},${n2},${n1},${n4}`;
+      
+      options = shuffleArray([
+        correctOrder,
+        `${n1},${n3},${n6},${n5},${n2},${n4}`,
+        `${n4},${n3},${n6},${n2},${n5},${n1}`,
+        `${n3},${n2},${n6},${n1},${n4},${n5}`,
+        `${n6},${n3},${n1},${n2},${n4},${n5}`
+      ]);
+      correctAnswer = correctOrder;
+      explanation = `分析规则可知，顺序必须满足：${n3}->${n2}->${n1}->${n4}，并且 ${n6}->${n5}。同时 ${n1} 和 ${n6} 不能相邻。选项 ${correctOrder} 完美符合所有条件。`;
+
+    } else if (templateType === 4) {
+      // 充分必要条件 (找错误项)
+      const company = companies[getRandomInt(0, companies.length - 1)];
+      const name = names[getRandomInt(0, names.length - 1)];
+      
+      content = `${company} 有一个顾问团队。所有首席顾问都有超过一年的经验。所有运行高管研讨会的顾问都拥有MBA学位。所有处理多个研讨会主题的顾问都是首席顾问。所有提供金融研讨会的顾问都拥有MBA学位。${name}运行高管研讨会并处理多个研讨会主题。`;
+      questionText = '假设这些陈述为真，以下哪项**可能为假**？';
+      
+      options = [
+        `${name}有超过一年的经验。`,
+        `${name}拥有MBA学位。`,
+        `${name}是首席顾问。`,
+        `${name}提供金融研讨会。`,
+        `所有处理多个研讨会主题的顾问都有超过一年的经验。`
+      ];
+      correctAnswer = `${name}提供金融研讨会。`;
+      explanation = `已知 ${name} 处理多个主题，所以他是首席顾问，因此有超过一年经验。他运行高管研讨会，所以他有MBA。但拥有MBA不代表他一定提供金融研讨会，这是充分条件的倒置，所以此项可能为假。`;
+
+    } else {
+      // 互斥集合
+      const company = companies[getRandomInt(0, companies.length - 1)];
+      const major1 = '计算机科学';
+      const major2 = '文学';
+      const role = '分析师';
+      
+      content = `${company} 在招聘 ${role}。他们发现所有前${major1}专业的学生都成为了${role}。他们还发现没有前${major2}专业的学生成为${role}。`;
+      
+      options = [
+        `所有前${major2}专业的学生也是前${major1}专业的学生。`,
+        `所有不是前${major2}专业的学生都是前${major1}专业的学生。`,
+        `一些前${major1}专业的学生不是前${major2}专业的学生。`,
+        `没有不是前${major1}专业的学生不是前${major2}专业的学生。`,
+        `一些前${major2}专业的学生也是前${major1}专业的学生。`
+      ];
+      correctAnswer = `一些前${major1}专业的学生不是前${major2}专业的学生。`;
+      explanation = `由于所有${major1}学生都成了${role}，而没有${major2}学生成为${role}，这两个集合之间不存在交集（至少对于成为分析师的那部分）。因此必然有一些${major1}学生不是${major2}学生。`;
+    }
+
+    questions.push({
+      id: `gen-ap-reasoning-${Date.now()}-${i}`,
+      type: 'aon_ap_reasoning',
+      content: `${content}\n\n${questionText}`,
+      options,
+      correctAnswer,
+      explanation,
+      difficulty,
+      isAonStyle: true
+    });
+  }
+
+  return questions;
+};
+
+/**
  * 生成 Aon Numerical Reasoning (数字图表推理) 题目
  */
 export const generateNumericalReasoning = (count: number = 20): Question[] => {
