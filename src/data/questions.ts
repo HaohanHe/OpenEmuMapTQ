@@ -2919,12 +2919,94 @@ export const basicNumericalQuestions = generateBasicNumericalQuestions();
 export const appliedNumeracyQuestions = generateAppliedNumeracyQuestions();
 export const apReasoningQuestions = generateAPReasoningQuestions();
 
+// 生成3x3网格填充题目
+function generateGridFillQuestions(): Question[] {
+  const questions: Question[] = [];
+  
+  const gridFillCases = [
+    {
+      grid: [
+        ['circle', 'triangle', 'square'],
+        ['triangle', 'square', 'circle'],
+        ['square', null, 'triangle']
+      ],
+      missingPosition: { row: 2, col: 1 },
+      options: [
+        [['circle', 'triangle', 'square'], ['triangle', 'square', 'circle'], ['square', 'circle', 'triangle']],
+        [['circle', 'circle', 'circle'], ['triangle', 'triangle', 'triangle'], ['square', 'square', 'square']],
+        [['square', 'triangle', 'circle'], ['square', 'triangle', 'circle'], ['square', 'triangle', 'circle']],
+        [['cross', 'cross', 'cross'], ['cross', 'cross', 'cross'], ['cross', 'cross', 'cross']]
+      ],
+      correctAnswer: '0',
+      difficulty: 2,
+      explanation: '规则：每一行的形状按顺序循环排列'
+    },
+    {
+      grid: [
+        ['cross', 'circle', 'cross'],
+        ['circle', 'cross', 'circle'],
+        ['cross', null, 'cross']
+      ],
+      missingPosition: { row: 2, col: 1 },
+      options: [
+        [['cross', 'circle', 'cross'], ['circle', 'cross', 'circle'], ['cross', 'circle', 'cross']],
+        [['circle', 'circle', 'circle'], ['circle', 'circle', 'circle'], ['circle', 'circle', 'circle']],
+        [['cross', 'cross', 'cross'], ['cross', 'cross', 'cross'], ['cross', 'cross', 'cross']],
+        [['circle', 'cross', 'circle'], ['cross', 'circle', 'cross'], ['circle', 'cross', 'circle']]
+      ],
+      correctAnswer: '0',
+      difficulty: 2,
+      explanation: '规则：圆形和十字交替排列，形成棋盘模式'
+    },
+    {
+      grid: [
+        ['square', 'square', 'triangle'],
+        ['square', 'square', 'triangle'],
+        ['cross', null, 'triangle']
+      ],
+      missingPosition: { row: 2, col: 1 },
+      options: [
+        [['triangle', 'triangle', 'circle'], ['triangle', 'triangle', 'circle'], ['square', 'square', 'circle']],
+        [['cross', 'cross', 'square'], ['cross', 'cross', 'square'], ['circle', 'circle', 'square']],
+        [['square', 'triangle', 'circle'], ['square', 'triangle', 'circle'], ['square', 'triangle', 'circle']],
+        [['cross', 'cross', 'triangle'], ['cross', 'cross', 'triangle'], ['cross', 'cross', 'triangle']]
+      ],
+      correctAnswer: '3',
+      difficulty: 2,
+      explanation: '规则：第一列和第二列的形状相同，第三列都是三角形'
+    }
+  ];
+  
+  gridFillCases.forEach((c, idx) => {
+    questions.push({
+      id: `grid-fill-${idx + 1}`,
+      type: 'aon_inductive_grid_fill',
+      content: '选择正确的网格来完成模式',
+      options: [],
+      correctAnswer: c.correctAnswer,
+      explanation: c.explanation,
+      difficulty: c.difficulty,
+      isAonStyle: true,
+      gridFillData: {
+        grid: c.grid,
+        missingPosition: c.missingPosition,
+        options: c.options
+      }
+    });
+  });
+  
+  return questions;
+}
+
+export const gridFillQuestions = generateGridFillQuestions();
+
 export const allQuestions = [
   ...switchChallengeQuestions,
   ...gridChallengeQuestions,
   ...scalesIxQuestions,
   ...digitChallengeQuestions,
   ...gridInductiveQuestions,
+  ...gridFillQuestions,
   ...basicVerbalQuestions,
   ...basicNumericalQuestions,
   ...appliedNumeracyQuestions,
@@ -2947,6 +3029,8 @@ export const getQuestionsByType = (type: string) => {
       return digitChallengeQuestions;
     case 'aon_inductive_grid':
       return gridInductiveQuestions;
+    case 'aon_inductive_grid_fill':
+      return gridFillQuestions;
     case 'aon_verbal':
       return basicVerbalQuestions;
     case 'aon_numerical':

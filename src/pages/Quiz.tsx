@@ -10,6 +10,7 @@ const GridChallenge = lazy(() => import('@/components/GridChallenge'));
 const ScalesIx = lazy(() => import('@/components/ScalesIx'));
 const DigitChallenge = lazy(() => import('@/components/DigitChallenge'));
 const GridInductive = lazy(() => import('@/components/GridInductive'));
+const GridFill = lazy(() => import('@/components/GridFill'));
 const NumericalReasoning = lazy(() => import('@/components/NumericalReasoning'));
 
 const Quiz: React.FC = () => {
@@ -250,6 +251,18 @@ const Quiz: React.FC = () => {
                 />
               )}
               
+              {/* Grid Fill 3x3网格填充题目 */}
+              {currentQuestion.gridFillData && (
+                <GridFill
+                  grid={currentQuestion.gridFillData.grid}
+                  missingPosition={currentQuestion.gridFillData.missingPosition}
+                  options={currentQuestion.gridFillData.options}
+                  selectedAnswer={selectedAnswer}
+                  correctAnswer={currentQuestion.correctAnswer}
+                  onSelect={handleAnswerSelect}
+                />
+              )}
+              
               {/* 数字推理题目 */}
               {currentQuestion.type === 'aon_numerical' && currentQuestion.dataSheet && (
                 <NumericalReasoning
@@ -264,7 +277,7 @@ const Quiz: React.FC = () => {
             </Suspense>
             
             {/* 普通题目 */}
-            {!currentQuestion.switchChallengeData && !currentQuestion.gridChallengeData && !currentQuestion.scalesIxData && !currentQuestion.digitChallengeData && !currentQuestion.gridInductiveData && currentQuestion.type !== 'aon_numerical' && (
+            {!currentQuestion.switchChallengeData && !currentQuestion.gridChallengeData && !currentQuestion.scalesIxData && !currentQuestion.digitChallengeData && !currentQuestion.gridInductiveData && !currentQuestion.gridFillData && currentQuestion.type !== 'aon_numerical' && (
               <>
                 <h2 className="text-2xl font-bold mb-6">{currentQuestion.content}</h2>
                 

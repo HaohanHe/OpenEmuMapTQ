@@ -32,6 +32,12 @@ export interface GridInductiveData {
   correctPairs: [number, number];
 }
 
+export interface GridFillData {
+  grid: (string | null)[][];
+  missingPosition: { row: number; col: number };
+  options: (string | null)[][][];
+}
+
 export interface Question {
   id: string;
   type: string;
@@ -47,6 +53,7 @@ export interface Question {
   scalesIxData?: ScalesIxData;
   digitChallengeData?: DigitChallengeData;
   gridInductiveData?: GridInductiveData;
+  gridFillData?: GridFillData;
 }
 
 export interface UserAnswer {
