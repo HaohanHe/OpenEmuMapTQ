@@ -503,35 +503,57 @@ export const generateApReasoning = (count: number = 20): Question[] => {
 export const generateNumericalReasoning = (count: number = 20): Question[] => {
   const questions: Question[] = [];
   
-  const categories = ['销售额', '研发成本', '营销费用', '管理费用', '净利润', '员工薪酬'];
-  const years = ['2021', '2022', '2023', '2024'];
+  const categoriesList = [
+    ['销售额', '研发成本', '营销费用', '管理费用', '净利润', '员工薪酬'],
+    ['北美收入', '欧洲收入', '亚洲收入', '南美收入', '非洲收入'],
+    ['智能手机', '笔记本电脑', '平板电脑', '智能手表', '配件'],
+    ['一季度', '二季度', '三季度', '四季度']
+  ];
+  const tabNames = ['公司财务', '地区收入', '产品线销量', '季度业绩', '员工数据', '市场份额'];
 
   for (let i = 0; i < count; i++) {
     const difficulty = getRandomInt(1, 5);
     
-    // 随机生成一个数据表
-    const numCategories = getRandomInt(3, 5);
-    const selectedCategories = shuffleArray(categories).slice(0, numCategories);
-    const numYears = getRandomInt(2, 4);
-    const selectedYears = years.slice(years.length - numYears);
+    // 随机生成 4-6 个 Tab 页的数据
+    const numTabs = getRandomInt(4, 6);
+    const selectedTabNames = shuffleArray(tabNames).slice(0, numTabs);
     
-    const tableData: Record<string, Record<string, number>> = {};
+    // 生成每个 Tab 的表格数据，并拼装成一个特殊的 Markdown 格式
+    // 格式约定：[TAB:Tab名称]\n[TABLE]\n表格内容\n
+    let dataSheet = '';
+    const allTableData: Record<string, { categories: string[], years: string[], data: Record<string, Record<string, number>> }> = {};
     
-    selectedCategories.forEach(cat => {
-      tableData[cat] = {};
-      selectedYears.forEach(year => {
-        tableData[cat][year] = getRandomInt(1000, 9999);
+    selectedTabNames.forEach(tabName => {
+      const categories = categoriesList[getRandomInt(0, categoriesList.length - 1)];
+      const years = ['2021', '2022', '2023', '2024'];
+      
+      const numCategories = getRandomInt(3, 5);
+      const selectedCategories = shuffleArray(categories).slice(0, numCategories);
+      const numYears = getRandomInt(2, 4);
+      const selectedYears = years.slice(years.length - numYears);
+      
+      const tableData: Record<string, Record<string, number>> = {};
+      selectedCategories.forEach(cat => {
+        tableData[cat] = {};
+        selectedYears.forEach(year => {
+          tableData[cat][year] = getRandomInt(1000, 9999);
+        });
       });
+      
+      allTableData[tabName] = { categories: selectedCategories, years: selectedYears, data: tableData };
+      
+      dataSheet += `[TAB:${tabName}]\n[TABLE]\n`;
+      dataSheet += `项目 | ${selectedYears.join(' | ')}\n`;
+      selectedCategories.forEach(cat => {
+        const row = [cat, ...selectedYears.map(y => tableData[cat][y].toString())];
+        dataSheet += `${row.join(' | ')}\n`;
+      });
+      dataSheet += '\n(单位：百万美元)\n\n';
     });
 
-    // 格式化表格为 Markdown 格式，因为 NumericalReasoning 组件支持 [TABLE] 标签
-    let dataSheet = '[TABLE]\n';
-    dataSheet += `项目 | ${selectedYears.join(' | ')}\n`;
-    selectedCategories.forEach(cat => {
-      const row = [cat, ...selectedYears.map(y => tableData[cat][y].toString())];
-      dataSheet += `${row.join(' | ')}\n`;
-    });
-    dataSheet += '\n(单位：百万美元)';
+    // 随机选择一个 Tab 作为出题目标
+    const targetTabName = selectedTabNames[getRandomInt(0, selectedTabNames.length - 1)];
+    const targetTabData = allTableData[targetTabName];
 
     // 生成问题 (正确 / 错误 / 无法确定)
     const questionType = getRandomInt(0, 2); // 0: True, 1: False, 2: Cannot Say
@@ -540,9 +562,9 @@ export const generateNumericalReasoning = (count: number = 20): Question[] => {
     let correctAnswer = '';
     let explanation = '';
     
-    const randomCat = selectedCategories[getRandomInt(0, selectedCategories.length - 1)];
-    const randomYear = selectedYears[getRandomInt(0, selectedYears.length - 1)];
-    const actualValue = tableData[randomCat][randomYear];
+    const randomCat = targetTabData.categories[getRandomInt(0, targetTabData.categories.length - 1)];
+    const randomYear = targetTabData.years[getRandomInt(0, targetTabData.years.length - 1)];
+    const actualValue = targetTabData.data[randomCat][randomYear];
     
     if (questionType === 0) { // True
       // 模糊描述大于/小于
@@ -553,7 +575,7 @@ export const generateNumericalReasoning = (count: number = 20): Question[] => {
         content = `在 ${randomYear} 年，${randomCat} 低于 ${actualValue + offset} 百万美元。`;
       }
       correctAnswer = '正确';
-      explanation = `表格显示 ${randomYear} 年的 ${randomCat} 为 ${actualValue} 百万美元，这符合题目描述。`;
+      explanation = `在“${targetTabName}”标签页中，表格显示 ${randomYear} 年的 ${randomCat} 为 ${actualValue} 百万美元，这符合题目描述。`;
     } else if (questionType === 1) { // False
       const offset = getRandomInt(500, 1000);
       if (Math.random() > 0.5) {
@@ -562,13 +584,13 @@ export const generateNumericalReasoning = (count: number = 20): Question[] => {
         content = `在 ${randomYear} 年，${randomCat} 低于 ${actualValue - offset} 百万美元。`;
       }
       correctAnswer = '错误';
-      explanation = `表格显示 ${randomYear} 年的 ${randomCat} 为 ${actualValue} 百万美元，这与题目描述矛盾。`;
+      explanation = `在“${targetTabName}”标签页中，表格显示 ${randomYear} 年的 ${randomCat} 为 ${actualValue} 百万美元，这与题目描述矛盾。`;
     } else { // Cannot Say
       // 问一个不存在的年份或类别
       const missingYear = '2025';
       content = `在 ${missingYear} 年，${randomCat} 超过了 ${actualValue} 百万美元。`;
       correctAnswer = '无法确定';
-      explanation = `表格中没有提供 ${missingYear} 年的数据，因此无法确定该陈述的真伪。`;
+      explanation = `在所有标签页中都没有提供 ${missingYear} 年的数据，因此无法确定该陈述的真伪。`;
     }
 
     questions.push({
