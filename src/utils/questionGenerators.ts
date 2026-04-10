@@ -128,6 +128,83 @@ export const generateScalesIx = (count: number = 20): Question[] => {
 };
 
 /**
+ * 生成 Aon Digit Challenge (数字推理/填空) 题目
+ */
+export const generateDigitChallenge = (count: number = 20): Question[] => {
+  const questions: Question[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const difficulty = getRandomInt(1, 5);
+    
+    // 根据难度决定操作符和数字范围
+    let operators = ['+', '-'];
+    if (difficulty > 2) operators.push('*');
+    // if (difficulty > 4) operators.push('/'); // 除法容易产生小数，在此场景中较难控制整数解，暂且用乘法增加难度
+    
+    const op = operators[getRandomInt(0, operators.length - 1)];
+    
+    let a, b, target;
+    let equation = '';
+    let placeholderCount = 2;
+    let explanation = '';
+    let correctAnswer = '';
+    
+    // 生成一个合法的等式
+    if (op === '+') {
+      a = getRandomInt(1, 9);
+      b = getRandomInt(1, 9);
+      target = a + b;
+      equation = `? + ? = ${target}`;
+      explanation = `我们需要找到两个数字，它们的和为 ${target}。一个合法的解是 ${a} 和 ${b}。`;
+      correctAnswer = `${a}${b}`;
+    } else if (op === '-') {
+      a = getRandomInt(2, 9);
+      b = getRandomInt(1, a - 1);
+      target = a - b;
+      equation = `? - ? = ${target}`;
+      explanation = `我们需要找到两个数字，它们的差为 ${target}。一个合法的解是 ${a} 和 ${b}。`;
+      correctAnswer = `${a}${b}`;
+    } else if (op === '*') {
+      a = getRandomInt(2, 9);
+      b = getRandomInt(2, 9);
+      target = a * b;
+      equation = `? × ? = ${target}`;
+      explanation = `我们需要找到两个数字，它们的乘积为 ${target}。一个合法的解是 ${a} 和 ${b}。`;
+      correctAnswer = `${a}${b}`;
+    }
+
+    // 偶尔生成带有3个问号的高难度题 (比如 ? + ? - ? = X)
+    if (difficulty >= 4 && Math.random() > 0.5) {
+      placeholderCount = 3;
+      a = getRandomInt(1, 9);
+      b = getRandomInt(1, 9);
+      let c = getRandomInt(1, a + b - 1); // 保证结果为正数
+      target = a + b - c;
+      equation = `? + ? - ? = ${target}`;
+      explanation = `我们需要找到三个数字，满足前两个数字之和减去第三个数字等于 ${target}。一个合法的解是 ${a}, ${b} 和 ${c}。`;
+      correctAnswer = `${a}${b}${c}`;
+    }
+
+    questions.push({
+      id: `gen-digit-${Date.now()}-${i}`,
+      type: 'aon_digit_challenge',
+      content: '将数字填入等式中，使其成立',
+      options: [],
+      correctAnswer: correctAnswer, // 在 Digit Challenge 中，这个字段只是作为“一个合法示例”，实际评分会使用表达式计算器
+      explanation: `【解析】\n${explanation}\n\n注意：这道题可能存在多个不同的合法答案，只要代入后等式成立即算正确。`,
+      difficulty,
+      isAonStyle: true,
+      digitChallengeData: {
+        equation,
+        placeholderCount
+      }
+    });
+  }
+
+  return questions;
+};
+
+/**
  * 生成 4x4 拉丁方阵 (每一行每一列没有重复元素)
  */
 const generateLatinSquare = (elements: ShapeType[]): ShapeType[][] => {

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Question, UserAnswer, QuizResult, QuizType } from '@/types';
 import { getQuestionsByType } from '@/data/questions';
-import { generateSwitchChallenge, generateScalesIx, generateGridChallenge, generateGridInductive, generateNumericalReasoning, generateApReasoning } from '@/utils/questionGenerators';
+import { generateSwitchChallenge, generateScalesIx, generateGridChallenge, generateGridInductive, generateNumericalReasoning, generateApReasoning, generateDigitChallenge } from '@/utils/questionGenerators';
 import {
   AdaptiveTestState,
   initializeAdaptiveTest,
@@ -83,6 +83,8 @@ export const useQuizStore = create<QuizState>()(
             allQuestions = generateNumericalReasoning(100);
           } else if (type === 'aon_ap_reasoning') {
             allQuestions = generateApReasoning(100);
+          } else if (type === 'aon_digit_challenge') {
+            allQuestions = generateDigitChallenge(100);
           } else if (type === 'random') {
             // 在快速开始/随机模式下，混合静态题库和各种动态生成的题库
             const staticQuestions = getQuestionsByType('random'); // 拿到30道静态随机题
@@ -92,7 +94,8 @@ export const useQuizStore = create<QuizState>()(
               ...generateGridChallenge(5),
               ...generateGridInductive(5),
               ...generateNumericalReasoning(5),
-              ...generateApReasoning(5)
+              ...generateApReasoning(5),
+              ...generateDigitChallenge(5)
             ];
             // 打乱混合后的题库
             allQuestions = [...staticQuestions, ...dynamicQuestions].sort(() => 0.5 - Math.random());
@@ -197,19 +200,45 @@ export const useQuizStore = create<QuizState>()(
           );
           
           const newUserAnswers = [...userAnswers];
+          // 特殊题型的答案验证逻辑 (如 Digit Challenge 有多个合法解)
+          let isCorrect = false;
+          if (currentQuestion.type === 'aon_digit_challenge' && currentQuestion.digitChallengeData) {
+            const { equation, placeholderCount } = currentQuestion.digitChallengeData;
+            const digits = answer.split('');
+            if (digits.length === placeholderCount) {
+              let evalStr = equation;
+              digits.forEach(d => {
+                evalStr = evalStr.replace('?', d);
+              });
+              const safeExpression = evalStr.replace(/=/g, '===')
+                                            .replace(/×/g, '*')
+                                            .replace(/÷/g, '/');
+              try {
+                if (/^[0-9+\-*/()\s=]+$/.test(safeExpression)) {
+                  isCorrect = Function(`'use strict'; return (${safeExpression})`)();
+                }
+              } catch (e) {
+                isCorrect = false;
+              }
+            }
+          } else {
+            // 普通题型直接对比字符串
+            isCorrect = answer === currentQuestion.correctAnswer;
+          }
+
           if (existingAnswerIndex >= 0) {
             // 更新已有答案
             newUserAnswers[existingAnswerIndex] = {
               questionId: currentQuestion.id,
               selectedAnswer: answer,
-              isCorrect: answer === currentQuestion.correctAnswer,
+              isCorrect,
             };
           } else {
             // 添加新答案
             newUserAnswers.push({
               questionId: currentQuestion.id,
               selectedAnswer: answer,
-              isCorrect: answer === currentQuestion.correctAnswer,
+              isCorrect,
             });
           }
           
