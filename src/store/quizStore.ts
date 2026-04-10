@@ -105,28 +105,30 @@ export const useQuizStore = create<QuizState>()(
           switch (type) {
             case 'aon_verbal':
             case 'aon_numerical':
-              timeLimit = 360; // 6分钟
+              timeLimit = 720; // 真实测试：12分钟 (37/49题)
               break;
             case 'aon_inductive':
-              timeLimit = 300; // 5分钟
+            case 'aon_inductive_grid':
+            case 'aon_inductive_grid_fill':
+              timeLimit = 720; // cls 通常是12分钟
               break;
             case 'aon_deductive_switch':
-              timeLimit = 300; // 5分钟
+              timeLimit = 360; // lst 真实测试：6分钟 (15题或无限自适应)
               break;
             case 'aon_inductive_scales':
-              timeLimit = 240; // 4分钟
+              timeLimit = 300; // ix 真实测试：5分钟 (20题)
+              break;
+            case 'aon_gap_challenge':
+              timeLimit = 300; // sx 真实测试：5分钟
               break;
             case 'aon_ap_reasoning':
               timeLimit = 480; // 8分钟
               break;
-            case 'aon_gap_challenge':
-              timeLimit = 300; // 5分钟
-              break;
             case 'aon_digit_challenge':
-              timeLimit = 300; // 5分钟
+              timeLimit = 300; // eql 真实测试：5分钟 (15题或无限自适应)
               break;
             case 'aon_applied_numeracy':
-              timeLimit = 360; // 6分钟
+              timeLimit = 960; // tmt 真实测试：16分钟 (20题)
               break;
             case 'cognitive':
             case 'numerical':
