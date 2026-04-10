@@ -187,11 +187,40 @@ const Quiz: React.FC = () => {
           <div className="mb-8">
             {/* 数据表格（Aon风格题目） */}
             {currentQuestion.dataSheet && currentQuestion.type !== 'aon_numerical' && (
-              <div className="mb-6 p-4 bg-primary-800/70 rounded-lg border border-primary-700">
-                <h3 className="text-lg font-semibold mb-3 text-primary-300">数据表格</h3>
-                <div className="text-sm text-primary-200 whitespace-pre-wrap">
-                  {currentQuestion.dataSheet}
-                </div>
+              <div className="mb-8 p-6 bg-primary-800/60 rounded-xl border border-primary-700 overflow-x-auto">
+                <h3 className="text-lg font-semibold mb-4 text-primary-300">数据表格</h3>
+                {currentQuestion.dataSheet.includes('[TABLE]') ? (
+                  <table className="w-full text-sm">
+                    <tbody>
+                      {currentQuestion.dataSheet.replace('[TABLE]', '').trim().split('\n').map((row, rowIndex) => {
+                        if (!row.trim()) return null;
+                        const cells = row.split('|').map(cell => cell.trim());
+                        return (
+                          <tr key={rowIndex} className={rowIndex === 0 ? 'border-b border-primary-600' : ''}>
+                            {cells.map((cell, cellIndex) => (
+                              <td key={cellIndex} className="py-2 px-4 text-left">
+                                <span className={rowIndex === 0 ? 'font-semibold text-primary-300' : 'text-primary-200'}>
+                                  {cell}
+                                </span>
+                              </td>
+                            ))}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                ) : currentQuestion.dataSheet.includes('[CHART]') ? (
+                  <div className="text-center">
+                    <div className="w-64 h-48 bg-primary-700/40 rounded-lg flex items-center justify-center mb-4">
+                      <div className="text-primary-300">图表区域</div>
+                    </div>
+                    <p className="text-sm text-primary-300">{currentQuestion.dataSheet.replace('[CHART]', '').trim()}</p>
+                  </div>
+                ) : (
+                  <div className="text-sm text-primary-200 whitespace-pre-wrap">
+                    {currentQuestion.dataSheet}
+                  </div>
+                )}
               </div>
             )}
             
