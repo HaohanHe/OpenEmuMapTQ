@@ -309,10 +309,10 @@ const Quiz: React.FC = () => {
               )}
             </Suspense>
             
-            {/* 普通题目 */}
+            {/* 普通题目 (包括 AP Reasoning) */}
             {!currentQuestion.switchChallengeData && !currentQuestion.gridChallengeData && !currentQuestion.scalesIxData && !currentQuestion.digitChallengeData && !currentQuestion.gridInductiveData && !currentQuestion.gridFillData && currentQuestion.type !== 'aon_numerical' && (
               <>
-                <h2 className="text-2xl font-bold mb-6">{currentQuestion.content}</h2>
+                <h2 className="text-xl md:text-2xl font-bold mb-6 leading-relaxed whitespace-pre-wrap">{currentQuestion.content}</h2>
                 
                 {/* 选项 */}
                 <div className="space-y-3">
