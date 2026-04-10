@@ -81,6 +81,19 @@ export const useQuizStore = create<QuizState>()(
             allQuestions = generateNumericalReasoning(100);
           } else if (type === 'aon_ap_reasoning') {
             allQuestions = generateApReasoning(100);
+          } else if (type === 'random') {
+            // 在快速开始/随机模式下，混合静态题库和各种动态生成的题库
+            const staticQuestions = getQuestionsByType('random'); // 拿到30道静态随机题
+            const dynamicQuestions = [
+              ...generateSwitchChallenge(5),
+              ...generateScalesIx(5),
+              ...generateGridChallenge(5),
+              ...generateGridInductive(5),
+              ...generateNumericalReasoning(5),
+              ...generateApReasoning(5)
+            ];
+            // 打乱混合后的题库
+            allQuestions = [...staticQuestions, ...dynamicQuestions].sort(() => 0.5 - Math.random());
           } else {
             allQuestions = getQuestionsByType(type);
           }
