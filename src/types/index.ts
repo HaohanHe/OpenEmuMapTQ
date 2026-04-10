@@ -32,6 +32,12 @@ export interface GridInductiveData {
   correctPairs: [number, number];
 }
 
+export interface GridFillData {
+  grid: (string | null)[][];
+  missingPosition: { row: number; col: number };
+  options: (string | null)[][][];
+}
+
 export interface Question {
   id: string;
   type: string;
@@ -47,6 +53,7 @@ export interface Question {
   scalesIxData?: ScalesIxData;
   digitChallengeData?: DigitChallengeData;
   gridInductiveData?: GridInductiveData;
+  gridFillData?: GridFillData;
 }
 
 export interface UserAnswer {
@@ -65,6 +72,6 @@ export interface QuizResult {
   completedAt: number;
 }
 
-export type QuizType = 'cognitive' | 'numerical' | 'verbal' | 'random' | 'aon_verbal' | 'aon_numerical' | 'aon_inductive' | 'aon_deductive_switch' | 'aon_inductive_scales' | 'aon_ap_reasoning' | 'aon_gap_challenge' | 'aon_digit_challenge' | 'aon_applied_numeracy';
+export type QuizType = 'cognitive' | 'numerical' | 'verbal' | 'random' | 'aon_verbal' | 'aon_numerical' | 'aon_inductive' | 'aon_deductive_switch' | 'aon_inductive_scales' | 'aon_ap_reasoning' | 'aon_gap_challenge' | 'aon_digit_challenge' | 'aon_applied_numeracy' | 'aon_inductive_grid_fill';
 
 export type AonAnswer = 'TRUE' | 'FALSE' | 'CANNOT SAY';
