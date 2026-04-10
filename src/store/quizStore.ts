@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Question, UserAnswer, QuizResult, QuizType } from '@/types';
 import { getQuestionsByType } from '@/data/questions';
-import { generateSwitchChallenge, generateScalesIx, generateGridChallenge } from '@/utils/questionGenerators';
+import { generateSwitchChallenge, generateScalesIx, generateGridChallenge, generateGridInductive, generateNumericalReasoning } from '@/utils/questionGenerators';
 import {
   AdaptiveTestState,
   initializeAdaptiveTest,
@@ -75,6 +75,10 @@ export const useQuizStore = create<QuizState>()(
             allQuestions = generateScalesIx(100);
           } else if (type === 'aon_gap_challenge') {
             allQuestions = generateGridChallenge(100);
+          } else if (type === 'aon_inductive_grid') {
+            allQuestions = generateGridInductive(100);
+          } else if (type === 'aon_numerical') {
+            allQuestions = generateNumericalReasoning(100);
           } else {
             allQuestions = getQuestionsByType(type);
           }

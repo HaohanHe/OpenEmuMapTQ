@@ -202,6 +202,249 @@ export const generateGridChallenge = (count: number = 20): Question[] => {
 };
 
 /**
+ * 生成 Aon Grid Inductive (3x3网格规则推理) 题目
+ */
+export const generateGridInductive = (count: number = 20): Question[] => {
+  const questions: Question[] = [];
+
+  const ruleTypes = [
+    'center_shape',       // 中心有一个特定形状
+    'corner_shapes',      // 四个角是特定形状
+    'middle_row_same',    // 中间一行都是同一个形状
+    'diagonal_same',      // 主对角线相同
+    'cross_pattern',      // 十字架模式相同
+  ];
+
+  for (let i = 0; i < count; i++) {
+    const difficulty = getRandomInt(1, 5);
+    const ruleType = ruleTypes[getRandomInt(0, ruleTypes.length - 1)];
+    const targetShape = ALL_SHAPES[getRandomInt(0, ALL_SHAPES.length - 1)];
+    const otherShapes = ALL_SHAPES.filter(s => s !== targetShape);
+
+    // 辅助函数：生成一个完全随机的3x3网格
+    const generateRandomGrid = () => {
+      const grid: (ShapeType | null)[][] = Array.from({ length: 3 }, () => Array(3).fill(null));
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          if (Math.random() > 0.3) {
+            grid[r][c] = ALL_SHAPES[getRandomInt(0, ALL_SHAPES.length - 1)];
+          }
+        }
+      }
+      return grid;
+    };
+
+    // 辅助函数：应用规则到网格
+    const applyRule = (grid: (ShapeType | null)[][]) => {
+      const newGrid = JSON.parse(JSON.stringify(grid));
+      switch (ruleType) {
+        case 'center_shape':
+          newGrid[1][1] = targetShape;
+          break;
+        case 'corner_shapes':
+          newGrid[0][0] = targetShape;
+          newGrid[0][2] = targetShape;
+          newGrid[2][0] = targetShape;
+          newGrid[2][2] = targetShape;
+          break;
+        case 'middle_row_same':
+          newGrid[1][0] = targetShape;
+          newGrid[1][1] = targetShape;
+          newGrid[1][2] = targetShape;
+          break;
+        case 'diagonal_same':
+          newGrid[0][0] = targetShape;
+          newGrid[1][1] = targetShape;
+          newGrid[2][2] = targetShape;
+          break;
+        case 'cross_pattern':
+          newGrid[0][1] = targetShape;
+          newGrid[1][0] = targetShape;
+          newGrid[1][1] = targetShape;
+          newGrid[1][2] = targetShape;
+          newGrid[2][1] = targetShape;
+          break;
+      }
+      return newGrid;
+    };
+
+    // 辅助函数：破坏规则 (确保不符合该规则)
+    const breakRule = (grid: (ShapeType | null)[][]) => {
+      const newGrid = JSON.parse(JSON.stringify(grid));
+      const wrongShape = otherShapes[getRandomInt(0, otherShapes.length - 1)];
+      switch (ruleType) {
+        case 'center_shape':
+          newGrid[1][1] = wrongShape; // 强制不是目标形状
+          break;
+        case 'corner_shapes':
+          newGrid[0][0] = wrongShape; // 至少一个角不是
+          break;
+        case 'middle_row_same':
+          newGrid[1][1] = wrongShape; // 打破中间行
+          break;
+        case 'diagonal_same':
+          newGrid[1][1] = wrongShape; // 打破对角线
+          break;
+        case 'cross_pattern':
+          newGrid[1][1] = wrongShape; // 打破十字架
+          break;
+      }
+      return newGrid;
+    };
+
+    // 生成2个示例网格 (符合规则)
+    const exampleGrids = [
+      applyRule(generateRandomGrid()),
+      applyRule(generateRandomGrid())
+    ];
+
+    // 生成4个候选网格 (2个符合，2个不符合)
+    const correctGrids = [
+      applyRule(generateRandomGrid()),
+      applyRule(generateRandomGrid())
+    ];
+    const wrongGrids = [
+      breakRule(generateRandomGrid()),
+      breakRule(generateRandomGrid())
+    ];
+
+    // 打乱4个候选网格
+    const questionGridsCandidates = [
+      { grid: correctGrids[0], isCorrect: true },
+      { grid: correctGrids[1], isCorrect: true },
+      { grid: wrongGrids[0], isCorrect: false },
+      { grid: wrongGrids[1], isCorrect: false }
+    ];
+    const shuffledCandidates = shuffleArray(questionGridsCandidates);
+
+    const questionGrids = shuffledCandidates.map(c => c.grid);
+    
+    // 找出正确的索引 (1-based)
+    const correctIndices = shuffledCandidates
+      .map((c, idx) => c.isCorrect ? idx + 1 : -1)
+      .filter(idx => idx !== -1)
+      .sort((a, b) => a - b);
+      
+    const correctAnswer = correctIndices.join(',');
+
+    let ruleDescription = '';
+    if (ruleType === 'center_shape') ruleDescription = `中心必须是 ${targetShape}`;
+    if (ruleType === 'corner_shapes') ruleDescription = `四个角必须都是 ${targetShape}`;
+    if (ruleType === 'middle_row_same') ruleDescription = `中间一行必须都是 ${targetShape}`;
+    if (ruleType === 'diagonal_same') ruleDescription = `主对角线必须都是 ${targetShape}`;
+    if (ruleType === 'cross_pattern') ruleDescription = `必须包含 ${targetShape} 组成的十字架`;
+
+    questions.push({
+      id: `gen-grid-inductive-${Date.now()}-${i}`,
+      type: 'aon_inductive_grid',
+      content: '观察左侧网格的规则，选择右侧两个遵循相同规则的网格',
+      options: [],
+      correctAnswer: correctAnswer,
+      explanation: `这两个示例网格的共同规则是：${ruleDescription}。右侧网格中只有第 ${correctIndices[0]} 和第 ${correctIndices[1]} 个符合此规则。`,
+      difficulty,
+      isAonStyle: true,
+      gridInductiveData: {
+        exampleGrids,
+        questionGrids,
+        correctPairs: [correctIndices[0], correctIndices[1]]
+      }
+    });
+  }
+
+  return questions;
+};
+
+/**
+ * 生成 Aon Numerical Reasoning (数字图表推理) 题目
+ */
+export const generateNumericalReasoning = (count: number = 20): Question[] => {
+  const questions: Question[] = [];
+  
+  const categories = ['销售额', '研发成本', '营销费用', '管理费用', '净利润', '员工薪酬'];
+  const years = ['2021', '2022', '2023', '2024'];
+
+  for (let i = 0; i < count; i++) {
+    const difficulty = getRandomInt(1, 5);
+    
+    // 随机生成一个数据表
+    const numCategories = getRandomInt(3, 5);
+    const selectedCategories = shuffleArray(categories).slice(0, numCategories);
+    const numYears = getRandomInt(2, 4);
+    const selectedYears = years.slice(years.length - numYears);
+    
+    const tableData: Record<string, Record<string, number>> = {};
+    
+    selectedCategories.forEach(cat => {
+      tableData[cat] = {};
+      selectedYears.forEach(year => {
+        tableData[cat][year] = getRandomInt(1000, 9999);
+      });
+    });
+
+    // 格式化表格为 Markdown 格式，因为 NumericalReasoning 组件支持 [TABLE] 标签
+    let dataSheet = '[TABLE]\n';
+    dataSheet += `项目 | ${selectedYears.join(' | ')}\n`;
+    selectedCategories.forEach(cat => {
+      const row = [cat, ...selectedYears.map(y => tableData[cat][y].toString())];
+      dataSheet += `${row.join(' | ')}\n`;
+    });
+    dataSheet += '\n(单位：百万美元)';
+
+    // 生成问题 (正确 / 错误 / 无法确定)
+    const questionType = getRandomInt(0, 2); // 0: True, 1: False, 2: Cannot Say
+    
+    let content = '';
+    let correctAnswer = '';
+    let explanation = '';
+    
+    const randomCat = selectedCategories[getRandomInt(0, selectedCategories.length - 1)];
+    const randomYear = selectedYears[getRandomInt(0, selectedYears.length - 1)];
+    const actualValue = tableData[randomCat][randomYear];
+    
+    if (questionType === 0) { // True
+      // 模糊描述大于/小于
+      const offset = getRandomInt(10, 100);
+      if (Math.random() > 0.5) {
+        content = `在 ${randomYear} 年，${randomCat} 超过了 ${actualValue - offset} 百万美元。`;
+      } else {
+        content = `在 ${randomYear} 年，${randomCat} 低于 ${actualValue + offset} 百万美元。`;
+      }
+      correctAnswer = '正确';
+      explanation = `表格显示 ${randomYear} 年的 ${randomCat} 为 ${actualValue} 百万美元，这符合题目描述。`;
+    } else if (questionType === 1) { // False
+      const offset = getRandomInt(500, 1000);
+      if (Math.random() > 0.5) {
+        content = `在 ${randomYear} 年，${randomCat} 超过了 ${actualValue + offset} 百万美元。`;
+      } else {
+        content = `在 ${randomYear} 年，${randomCat} 低于 ${actualValue - offset} 百万美元。`;
+      }
+      correctAnswer = '错误';
+      explanation = `表格显示 ${randomYear} 年的 ${randomCat} 为 ${actualValue} 百万美元，这与题目描述矛盾。`;
+    } else { // Cannot Say
+      // 问一个不存在的年份或类别
+      const missingYear = '2025';
+      content = `在 ${missingYear} 年，${randomCat} 超过了 ${actualValue} 百万美元。`;
+      correctAnswer = '无法确定';
+      explanation = `表格中没有提供 ${missingYear} 年的数据，因此无法确定该陈述的真伪。`;
+    }
+
+    questions.push({
+      id: `gen-numerical-${Date.now()}-${i}`,
+      type: 'aon_numerical',
+      content,
+      options: ['正确', '错误', '无法确定'],
+      correctAnswer,
+      explanation,
+      difficulty,
+      isAonStyle: true,
+      dataSheet
+    });
+  }
+
+  return questions;
+};
+
+/**
  * 生成 Aon Switch Challenge (演绎逻辑) 题目
  */
 export const generateSwitchChallenge = (count: number = 20): Question[] => {
