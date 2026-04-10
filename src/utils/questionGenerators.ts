@@ -127,18 +127,39 @@ const generateLatinSquare = (elements: ShapeType[]): ShapeType[][] => {
   const size = 4;
   const grid: ShapeType[][] = Array.from({ length: size }, () => Array(size).fill(null));
   
-  // 随机排列第一行
-  const firstRow = shuffleArray(elements);
-  grid[0] = [...firstRow];
+  // 预定义的几个绝对正确的 4x4 拉丁方阵数字模板 (0-3)
+  // 通过套用这些模板然后映射到真实的形状上，可以确保 100% 绝对不会有任何同行/同列重复
+  const templates = [
+    [
+      [0, 1, 2, 3],
+      [1, 0, 3, 2],
+      [2, 3, 0, 1],
+      [3, 2, 1, 0]
+    ],
+    [
+      [0, 1, 2, 3],
+      [2, 3, 0, 1],
+      [3, 2, 1, 0],
+      [1, 0, 3, 2]
+    ],
+    [
+      [0, 1, 2, 3],
+      [3, 2, 1, 0],
+      [1, 0, 3, 2],
+      [2, 3, 0, 1]
+    ]
+  ];
   
-  // 对于4x4拉丁方阵，简单的行位移即可
-  // 例如位移 1, 2, 3
-  const shifts = shuffleArray([1, 2, 3]);
+  // 随机挑一个模板
+  const template = templates[getRandomInt(0, templates.length - 1)];
   
-  for (let i = 1; i < size; i++) {
-    const shift = shifts[i - 1];
+  // 随机打乱传入的4个形状的映射关系
+  const mappedElements = shuffleArray(elements);
+  
+  // 根据模板填充网格
+  for (let i = 0; i < size; i++) {
     for (let j = 0; j < size; j++) {
-      grid[i][j] = firstRow[(j + shift) % size];
+      grid[i][j] = mappedElements[template[i][j]];
     }
   }
   
