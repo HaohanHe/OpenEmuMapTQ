@@ -42,7 +42,7 @@ const Quiz: React.FC = () => {
   // 当类型变化时，自动开始测试
   useEffect(() => {
     if (type && questions.length === 0) {
-      startQuiz(type as QuizType, false, type === 'random');
+      startQuiz(type as QuizType, false, type === 'random' || type === 'aon_inductive_grid_fill');
     }
   }, [type, questions.length, startQuiz]);
 

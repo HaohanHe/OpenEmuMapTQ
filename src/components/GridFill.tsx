@@ -96,7 +96,7 @@ export const GridFill: React.FC<GridFillProps> = ({
         <div className="text-center mb-6">
           <h3 className="text-lg font-semibold text-primary-300 mb-2">{language === 'zh' ? '选择正确的网格' : 'Select the correct grid'}</h3>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 justify-center">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 justify-center">
           {options.map((optionGrid, index) => (
             <button
               key={index}

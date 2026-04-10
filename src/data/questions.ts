@@ -2935,7 +2935,9 @@ function generateGridFillQuestions(): Question[] {
         [['circle', 'triangle', 'square'], ['triangle', 'square', 'circle'], ['square', 'circle', 'triangle']],
         [['circle', 'circle', 'circle'], ['triangle', 'triangle', 'triangle'], ['square', 'square', 'square']],
         [['square', 'triangle', 'circle'], ['square', 'triangle', 'circle'], ['square', 'triangle', 'circle']],
-        [['cross', 'cross', 'cross'], ['cross', 'cross', 'cross'], ['cross', 'cross', 'cross']]
+        [['cross', 'cross', 'cross'], ['cross', 'cross', 'cross'], ['cross', 'cross', 'cross']],
+        [['triangle', 'square', 'circle'], ['triangle', 'square', 'circle'], ['triangle', 'square', 'circle']],
+        [['square', 'circle', 'triangle'], ['square', 'circle', 'triangle'], ['square', 'circle', 'triangle']]
       ],
       correctAnswer: '0',
       difficulty: 2,
@@ -2952,7 +2954,9 @@ function generateGridFillQuestions(): Question[] {
         [['cross', 'circle', 'cross'], ['circle', 'cross', 'circle'], ['cross', 'circle', 'cross']],
         [['circle', 'circle', 'circle'], ['circle', 'circle', 'circle'], ['circle', 'circle', 'circle']],
         [['cross', 'cross', 'cross'], ['cross', 'cross', 'cross'], ['cross', 'cross', 'cross']],
-        [['circle', 'cross', 'circle'], ['cross', 'circle', 'cross'], ['circle', 'cross', 'circle']]
+        [['circle', 'cross', 'circle'], ['cross', 'circle', 'cross'], ['circle', 'cross', 'circle']],
+        [['cross', 'cross', 'circle'], ['cross', 'circle', 'cross'], ['circle', 'cross', 'cross']],
+        [['circle', 'circle', 'cross'], ['circle', 'cross', 'circle'], ['cross', 'circle', 'circle']]
       ],
       correctAnswer: '0',
       difficulty: 2,
@@ -2969,7 +2973,9 @@ function generateGridFillQuestions(): Question[] {
         [['triangle', 'triangle', 'circle'], ['triangle', 'triangle', 'circle'], ['square', 'square', 'circle']],
         [['cross', 'cross', 'square'], ['cross', 'cross', 'square'], ['circle', 'circle', 'square']],
         [['square', 'triangle', 'circle'], ['square', 'triangle', 'circle'], ['square', 'triangle', 'circle']],
-        [['cross', 'cross', 'triangle'], ['cross', 'cross', 'triangle'], ['cross', 'cross', 'triangle']]
+        [['cross', 'cross', 'triangle'], ['cross', 'cross', 'triangle'], ['cross', 'cross', 'triangle']],
+        [['square', 'square', 'circle'], ['square', 'square', 'circle'], ['cross', 'cross', 'circle']],
+        [['triangle', 'triangle', 'triangle'], ['triangle', 'triangle', 'triangle'], ['triangle', 'triangle', 'triangle']]
       ],
       correctAnswer: '3',
       difficulty: 2,
