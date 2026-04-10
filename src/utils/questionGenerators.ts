@@ -75,20 +75,24 @@ export const generateScalesIx = (count: number = 20): Question[] => {
     
     let sequence: ShapeType[] = [];
     let patternName = '';
+    let patternDescription = '';
     
     // 根据难度选择模式
     if (difficulty <= 2) {
       // A B A B A B A B A
       for (let j = 0; j < 9; j++) sequence.push(j % 2 === 0 ? A : B);
       patternName = '交替 (A B A B)';
+      patternDescription = `在这个序列中，图形应该是 ${A} 和 ${B} 交替出现，也就是第1个是 ${A}，第2个是 ${B}，第3个是 ${A}，以此类推。`;
     } else if (difficulty <= 4) {
       // A A B B A A B B A
       for (let j = 0; j < 9; j++) sequence.push(Math.floor(j / 2) % 2 === 0 ? A : B);
       patternName = '双重复 (A A B B)';
+      patternDescription = `在这个序列中，图形应该是 ${A} 和 ${B} 各连续出现两次再交替，也就是 ${A}, ${A}, 然后 ${B}, ${B}，以此类推。`;
     } else {
       // A B C A B C A B C
       for (let j = 0; j < 9; j++) sequence.push([A, B, C][j % 3]);
       patternName = '三循环 (A B C A B C)';
+      patternDescription = `在这个序列中，图形应该是以 ${A}, ${B}, ${C} 为一组，三个图形作为一个单元不断循环重复出现。`;
     }
 
     // 随机挑选一个位置打破规则 (不能是第一个，否则太容易被当成另一种规则)
@@ -99,6 +103,9 @@ export const generateScalesIx = (count: number = 20): Question[] => {
     if (wrongShape === correctShape) wrongShape = availableShapes[8] || availableShapes[4];
     
     sequence[errorIndex] = wrongShape;
+    
+    // 生成保姆级解析
+    const explanation = `【解析】\n通过观察其他正确的图形，我们可以推断出正确的模式是：${patternName}。\n${patternDescription}\n\n如果你顺着这个规律往下数：\n- 第 ${errorIndex + 1} 个位置本该轮到 ${correctShape}\n- 但是它实际显示成了 ${wrongShape}\n\n因此，第 ${errorIndex + 1} 个图形破坏了规律，就是我们要找的“Odd One Out”。`;
 
     questions.push({
       id: `gen-scales-${Date.now()}-${i}`,
@@ -106,7 +113,7 @@ export const generateScalesIx = (count: number = 20): Question[] => {
       content: '观察下面的图形序列，找出不符合规律的那一个',
       options: Array.from({ length: 9 }, (_, k) => k.toString()), // 0-8
       correctAnswer: errorIndex.toString(),
-      explanation: `正确的模式是 ${patternName}。第 ${errorIndex + 1} 个图形本应该是 ${correctShape}，但实际上是 ${wrongShape}。`,
+      explanation: explanation,
       difficulty,
       isAonStyle: true,
       scalesIxData: {
