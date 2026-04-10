@@ -39,10 +39,14 @@ export const GridChallenge: React.FC<GridChallengeProps> = ({
 
   const getShapeColor = (shape: string) => {
     switch (shape) {
-      case 'circle': return '#7C3AED';
-      case 'triangle': return '#10B981';
-      case 'cross': return '#F59E0B';
-      case 'star': return '#06B6D4';
+      case 'circle': return '#7C3AED'; // Purple
+      case 'triangle': return '#10B981'; // Green
+      case 'cross': return '#F59E0B'; // Yellow/Orange
+      case 'star': return '#06B6D4'; // Cyan
+      case 'diamond': return '#EF4444'; // Red
+      case 'hexagon': return '#3B82F6'; // Blue
+      case 'square': return '#EC4899'; // Pink
+      case 'x': return '#F97316'; // Orange
       default: return '#FFFFFF';
     }
   };

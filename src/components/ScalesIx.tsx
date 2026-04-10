@@ -52,26 +52,17 @@ export const ScalesIx: React.FC<ScalesIxProps> = ({
       </div>
 
       {/* 9个图形网格 */}
-      <div className="flex justify-center">
-        <div className="grid grid-cols-9 gap-3">
+      <div className="flex justify-center w-full overflow-x-auto pb-4 hide-scrollbar">
+        <div className="flex flex-nowrap gap-2 sm:gap-3 px-2 min-w-max">
           {allShapes.map((shape, index) => (
-            <button
-              key={index}
-              onClick={() => handleSelect(index)}
-              className={`p-3 rounded-lg border-2 transition-all duration-300 flex items-center justify-center ${getButtonClass(index)}`}
-            >
-              <Shape type={shape} size={40} />
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 数字标记 */}
-      <div className="flex justify-center">
-        <div className="grid grid-cols-9 gap-3 w-full max-w-2xl">
-          {allShapes.map((_, index) => (
-            <div key={index} className="text-center">
-              <span className="text-xs text-gray-500">{index + 1}</span>
+            <div key={index} className="flex flex-col items-center gap-2">
+              <button
+                onClick={() => handleSelect(index)}
+                className={`p-2 sm:p-3 rounded-lg border-2 transition-all duration-300 flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 ${getButtonClass(index)}`}
+              >
+                <Shape type={shape} size={32} />
+              </button>
+              <span className="text-xs text-gray-500 font-mono">{index + 1}</span>
             </div>
           ))}
         </div>

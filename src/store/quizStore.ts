@@ -24,6 +24,7 @@ interface QuizState {
   allQuestions: Question[];
   
   // 计时器相关
+  timeLimit: number;
   timeRemaining: number;
   isTimerRunning: boolean;
   isExamMode: boolean;
@@ -57,6 +58,7 @@ export const useQuizStore = create<QuizState>()(
       isAdaptiveMode: false,
       adaptiveState: initializeAdaptiveTest(),
       allQuestions: [],
+      timeLimit: 600,
       timeRemaining: 600, // 10分钟
       isTimerRunning: false,
       isExamMode: false,
@@ -160,6 +162,7 @@ export const useQuizStore = create<QuizState>()(
             isAdaptiveMode: adaptiveMode,
             adaptiveState: initialAdaptiveState,
             allQuestions,
+            timeLimit: timeLimit,
             timeRemaining: timeLimit,
             isTimerRunning: true,
             isExamMode: examMode,
@@ -227,6 +230,12 @@ export const useQuizStore = create<QuizState>()(
           }
           
           if (isAdaptiveMode) {
+            // 如果用户点击了“上一题”返回历史题目，再点击“下一题”时，直接递增索引，不要生成新题
+            if (currentQuestionIndex < questions.length - 1) {
+              set({ currentQuestionIndex: currentQuestionIndex + 1 });
+              return;
+            }
+
             if (currentQuestionIndex < 0 || currentQuestionIndex >= questions.length) {
               console.warn('Invalid question index');
               return;
@@ -297,7 +306,7 @@ export const useQuizStore = create<QuizState>()(
       // 提交测试
       submitQuiz: () => {
         try {
-          const { questions, userAnswers, quizType, timeRemaining } = get();
+          const { questions, userAnswers, quizType, timeLimit, timeRemaining } = get();
           
           if (questions.length === 0) {
             console.warn('No questions to submit');
@@ -313,7 +322,7 @@ export const useQuizStore = create<QuizState>()(
             quizType,
             totalQuestions: questions.length,
             correctAnswers,
-            timeSpent: Math.max(0, 600 - timeRemaining), // 确保时间不为负数
+            timeSpent: Math.max(0, timeLimit - timeRemaining), // 确保时间不为负数，且用正确的动态 timeLimit 计算
             userAnswers,
             completedAt: Date.now(),
           };
@@ -334,6 +343,7 @@ export const useQuizStore = create<QuizState>()(
           questions: [],
           currentQuestionIndex: 0,
           userAnswers: [],
+          timeLimit: 600,
           timeRemaining: 600,
           isTimerRunning: false,
           currentResult: null,
@@ -351,13 +361,13 @@ export const useQuizStore = create<QuizState>()(
       
       // 重做错题目
       retakeWrongQuestions: () => {
-        const { userAnswers, quizType } = get();
+        const { userAnswers, quizType, allQuestions, timeLimit } = get();
         const wrongQuestionIds = userAnswers
           .filter((ua) => !ua.isCorrect)
           .map((ua) => ua.questionId);
         
         if (wrongQuestionIds.length > 0) {
-          const allQuestions = getQuestionsByType(quizType);
+          // 直接从 allQuestions 状态中过滤错题，这样能兼容动态生成的题库
           const wrongQuestions = allQuestions.filter((q) => 
             wrongQuestionIds.includes(q.id)
           );
@@ -366,7 +376,7 @@ export const useQuizStore = create<QuizState>()(
             questions: wrongQuestions,
             currentQuestionIndex: 0,
             userAnswers: [],
-            timeRemaining: 300, // 5分钟
+            timeRemaining: timeLimit, // 使用当前测试类型的原定总时间
             isTimerRunning: true,
             currentResult: null,
           });
