@@ -234,6 +234,10 @@ const Quiz: React.FC = () => {
                   selectedAnswer={selectedAnswer}
                   correctAnswer={currentQuestion.correctAnswer}
                   onSelect={handleAnswerSelect}
+                  intermediateShapes={currentQuestion.switchChallengeData.intermediateShapes}
+                  firstCodeOptions={currentQuestion.switchChallengeData.firstCodeOptions}
+                  secondCodeOptions={currentQuestion.switchChallengeData.secondCodeOptions}
+                  isMultiStep={currentQuestion.switchChallengeData.isMultiStep}
                 />
               )}
               

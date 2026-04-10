@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Question, UserAnswer, QuizResult, QuizType } from '@/types';
 import { getQuestionsByType } from '@/data/questions';
+import { generateSwitchChallenge, generateScalesIx, generateGridChallenge } from '@/utils/questionGenerators';
 import {
   AdaptiveTestState,
   initializeAdaptiveTest,
@@ -65,7 +66,18 @@ export const useQuizStore = create<QuizState>()(
       // 开始测试
       startQuiz: (type: QuizType, examMode = false, adaptiveMode = false) => {
         try {
-          const allQuestions = getQuestionsByType(type);
+          let allQuestions: Question[] = [];
+          
+          // 如果是支持动态生成的题型，则生成题库 (这里设置默认生成100题，模拟无限题库)
+          if (type === 'aon_deductive_switch') {
+            allQuestions = generateSwitchChallenge(100);
+          } else if (type === 'aon_inductive_scales') {
+            allQuestions = generateScalesIx(100);
+          } else if (type === 'aon_gap_challenge') {
+            allQuestions = generateGridChallenge(100);
+          } else {
+            allQuestions = getQuestionsByType(type);
+          }
           
           if (allQuestions.length === 0) {
             console.warn(`No questions found for quiz type: ${type}`);
