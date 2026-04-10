@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Shape from './Shape';
+import { Shape } from './Shape';
+import { useLanguageStore } from '@/store/languageStore';
 
 interface GridInductiveProps {
   exampleGrids: (string | null)[][][];
@@ -16,6 +17,7 @@ export const GridInductive: React.FC<GridInductiveProps> = ({
   selectedAnswer,
   onSelect
 }) => {
+  const { language } = useLanguageStore();
   const [selectedGrids, setSelectedGrids] = useState<number[]>([]);
 
   useEffect(() => {
@@ -117,7 +119,7 @@ export const GridInductive: React.FC<GridInductiveProps> = ({
         {/* 示例网格 */}
         <div className="flex flex-col items-center">
           <div className="text-sm font-semibold text-gray-300 mb-3">
-            These two grids follow a rule
+            {language === 'zh' ? '这两个网格遵循同一规律' : 'These two grids follow a rule'}
           </div>
           <div className="space-y-3">
             {exampleGrids.map((grid, index) => (
@@ -131,7 +133,7 @@ export const GridInductive: React.FC<GridInductiveProps> = ({
         {/* 问题网格 */}
         <div className="flex flex-col items-center">
           <div className="text-sm font-semibold text-gray-300 mb-3">
-            Which two of these grids follow the same rule?
+            {language === 'zh' ? '以下哪两个网格遵循相同的规律？' : 'Which two of these grids follow the same rule?'}
           </div>
           <div className="grid grid-cols-2 gap-3">
             {questionGrids.map((grid, index) => (
@@ -144,11 +146,11 @@ export const GridInductive: React.FC<GridInductiveProps> = ({
       </div>
 
       {/* 选择提示 */}
-      <div className="text-center">
-        <p className="text-gray-300 text-sm">
-          {selectedGrids.length === 0 && 'Please select two grids'}
-          {selectedGrids.length === 1 && `Selected grid: ${selectedGrids[0]}, please select one more`}
-          {selectedGrids.length === 2 && `Selected grids: ${selectedGrids.sort((a, b) => a - b).join(' and ')}`}
+      <div className="text-center mt-4">
+        <p className="text-primary-300 text-sm font-medium">
+          {selectedGrids.length === 0 && (language === 'zh' ? '请选择两个网格' : 'Please select two grids')}
+          {selectedGrids.length === 1 && (language === 'zh' ? '请再选择一个网格' : 'Please select one more grid')}
+          {selectedGrids.length === 2 && (language === 'zh' ? '选择完成' : 'Selection complete')}
         </p>
       </div>
     </div>

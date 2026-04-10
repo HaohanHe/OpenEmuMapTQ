@@ -3006,6 +3006,12 @@ function generateGridFillQuestions(): Question[] {
 
 export const gridFillQuestions = generateGridFillQuestions();
 
+// ============================================================================
+// 注意：该文件中的许多静态题库（如 SwitchChallenge, GridChallenge 等）已被废弃，
+// 实际项目目前使用的是 src/utils/questionGenerators.ts 中的动态算法生成器。
+// 这些静态题库仅被保留作为回退(fallback)以及部分纯文本题型(如 aon_verbal)的数据源。
+// ============================================================================
+
 export const allQuestions = [
   ...switchChallengeQuestions,
   ...gridChallengeQuestions,
