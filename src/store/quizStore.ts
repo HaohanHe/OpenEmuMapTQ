@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Question, UserAnswer, QuizResult, QuizType } from '@/types';
 import { getQuestionsByType } from '@/data/questions';
-import { generateSwitchChallenge, generateScalesIx, generateGridChallenge, generateGridInductive, generateNumericalReasoning, generateApReasoning, generateDigitChallenge } from '@/utils/questionGenerators';
+import { generateSwitchChallenge, generateScalesIx, generateGapChallenge, generateGridInductive, generateNumericalReasoning, generateApReasoning, generateDigitChallenge } from '@/utils/questionGenerators';
 import {
   AdaptiveTestState,
   initializeAdaptiveTest,
@@ -76,7 +76,7 @@ export const useQuizStore = create<QuizState>()(
           } else if (type === 'aon_inductive_scales') {
             allQuestions = generateScalesIx(100);
           } else if (type === 'aon_gap_challenge') {
-            allQuestions = generateGridChallenge(100);
+            allQuestions = generateGapChallenge(100);
           } else if (type === 'aon_inductive_grid') {
             allQuestions = generateGridInductive(100);
           } else if (type === 'aon_numerical') {
@@ -86,19 +86,18 @@ export const useQuizStore = create<QuizState>()(
           } else if (type === 'aon_digit_challenge') {
             allQuestions = generateDigitChallenge(100);
           } else if (type === 'random') {
-            // 在快速开始/随机模式下，混合静态题库和各种动态生成的题库
-            const staticQuestions = getQuestionsByType('random'); // 拿到30道静态随机题
+            // 在快速开始/随机模式下，使用所有动态生成的题库
             const dynamicQuestions = [
-              ...generateSwitchChallenge(5),
-              ...generateScalesIx(5),
-              ...generateGridChallenge(5),
-              ...generateGridInductive(5),
-              ...generateNumericalReasoning(5),
-              ...generateApReasoning(5),
-              ...generateDigitChallenge(5)
+              ...generateSwitchChallenge(15),
+              ...generateScalesIx(15),
+              ...generateGapChallenge(15),
+              ...generateGridInductive(15),
+              ...generateNumericalReasoning(15),
+              ...generateApReasoning(15),
+              ...generateDigitChallenge(15)
             ];
-            // 打乱混合后的题库
-            allQuestions = [...staticQuestions, ...dynamicQuestions].sort(() => 0.5 - Math.random());
+            // 打乱题库
+            allQuestions = dynamicQuestions.sort(() => 0.5 - Math.random());
           } else {
             allQuestions = getQuestionsByType(type);
           }

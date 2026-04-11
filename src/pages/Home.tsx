@@ -27,8 +27,8 @@ const Home: React.FC = () => {
     },
     {
       id: 'aon_gap_challenge',
-      title: 'Grid Challenge',
-      description: '4×4网格形状填充测试',
+      title: 'Gap Challenge',
+      description: language === 'zh' ? '4×4网格形状填充测试(数独逻辑)' : '4x4 Grid Shape Filling Test (Sudoku Logic)',
       icon: <Brain className="w-8 h-8" />,
       color: 'from-green-500 to-green-700',
     },

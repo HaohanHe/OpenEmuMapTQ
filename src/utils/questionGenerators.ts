@@ -251,9 +251,9 @@ const generateLatinSquare = (elements: ShapeType[]): ShapeType[][] => {
 };
 
 /**
- * 生成 Aon Grid Challenge (网格填充) 题目
+ * 生成 Aon Gap Challenge (网格填充/符号数独) 题目
  */
-export const generateGridChallenge = (count: number = 20): Question[] => {
+export const generateGapChallenge = (count: number = 20): Question[] => {
   const questions: Question[] = [];
 
   for (let i = 0; i < count; i++) {

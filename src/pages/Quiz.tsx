@@ -244,14 +244,14 @@ const Quiz: React.FC = () => {
                 />
               )}
               
-              {/* GridChallenge 图形化题目 */}
+              {/* Gap Challenge (网格填充/符号数独) */}
               {currentQuestion.gridChallengeData && (
                 <GridChallenge
                   grid={currentQuestion.gridChallengeData.grid}
                   missingPosition={currentQuestion.gridChallengeData.missingPosition}
                   options={currentQuestion.options}
                   selectedAnswer={selectedAnswer}
-                  correctAnswer={currentQuestion.correctAnswer}
+                  correctAnswer={isExamMode ? undefined : currentQuestion.correctAnswer}
                   onSelect={handleAnswerSelect}
                 />
               )}
