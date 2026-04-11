@@ -38,13 +38,16 @@ const Quiz: React.FC = () => {
   const { language } = useLanguageStore();
 
   const [selectedAnswer, setSelectedAnswer] = useState('');
+  const [hasStarted, setHasStarted] = useState(false);
 
   // 当类型变化时，自动开始测试
   useEffect(() => {
-    if (type && questions.length === 0) {
+    // 只有在未开始且题目为空时才触发，避免因刷新页面触发重复生成
+    if (type && questions.length === 0 && !hasStarted) {
+      setHasStarted(true);
       startQuiz(type as QuizType, false, type === 'random' || type === 'aon_inductive_grid_fill');
     }
-  }, [type, questions.length, startQuiz]);
+  }, [type, questions.length, startQuiz, hasStarted]);
 
   // 处理计时器
   useEffect(() => {
@@ -68,23 +71,23 @@ const Quiz: React.FC = () => {
     }
   }, [currentQuestionIndex, questions, userAnswers]);
 
-  // 处理答案选择
-  const handleAnswerSelect = (answer: string) => {
+  // 处理答案选择 (使用 useCallback 避免向下传递的函数在每次 tick 重建)
+  const handleAnswerSelect = React.useCallback((answer: string) => {
     setSelectedAnswer(answer);
     selectAnswer(answer);
-  };
+  }, [selectAnswer]);
 
   // 处理提交
-  const handleSubmit = () => {
+  const handleSubmit = React.useCallback(() => {
     submitQuiz();
     navigate('/result');
-  };
+  }, [submitQuiz, navigate]);
 
   // 处理返回首页
-  const handleBackToHome = () => {
+  const handleBackToHome = React.useCallback(() => {
     resetQuiz();
     navigate('/');
-  };
+  }, [resetQuiz, navigate]);
 
   // 格式化时间
   const formatTime = (seconds: number) => {

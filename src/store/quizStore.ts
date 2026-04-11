@@ -183,7 +183,6 @@ export const useQuizStore = create<QuizState>()(
           const { questions, currentQuestionIndex, userAnswers } = get();
           
           if (questions.length === 0 || currentQuestionIndex < 0 || currentQuestionIndex >= questions.length) {
-            console.warn('Invalid question index or empty questions array');
             return;
           }
           
@@ -442,9 +441,36 @@ export const useQuizStore = create<QuizState>()(
     }),
     {
       name: 'aon-quiz-storage',
-      partialize: (state) => ({
-        results: state.results,
-      }),
+      // 取消仅持久化 results 的限制，改为持久化全部进度。
+      // 但对于包含了 Set 对象的 adaptiveState.usedQuestionIds，需要特殊序列化处理
+      storage: {
+        getItem: (name) => {
+          const str = localStorage.getItem(name);
+          if (!str) return null;
+          try {
+            const parsed = JSON.parse(str);
+            // 恢复 Set 对象
+            if (parsed.state?.adaptiveState?.usedQuestionIds) {
+              parsed.state.adaptiveState.usedQuestionIds = new Set(parsed.state.adaptiveState.usedQuestionIds);
+            }
+            return parsed;
+          } catch (e) {
+            return null;
+          }
+        },
+        setItem: (name, value) => {
+          // 转换 Set 为 Array 以便序列化
+          const stateToSave = { ...value };
+          if (stateToSave.state?.adaptiveState?.usedQuestionIds instanceof Set) {
+            const tempState = JSON.parse(JSON.stringify(stateToSave)); // 深拷贝
+            tempState.state.adaptiveState.usedQuestionIds = Array.from(stateToSave.state.adaptiveState.usedQuestionIds);
+            localStorage.setItem(name, JSON.stringify(tempState));
+            return;
+          }
+          localStorage.setItem(name, JSON.stringify(stateToSave));
+        },
+        removeItem: (name) => localStorage.removeItem(name),
+      },
     }
   )
 );

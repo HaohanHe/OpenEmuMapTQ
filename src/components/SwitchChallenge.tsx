@@ -16,7 +16,7 @@ interface SwitchChallengeProps {
   isMultiStep?: boolean;
 }
 
-export const SwitchChallenge: React.FC<SwitchChallengeProps> = ({
+export const SwitchChallengeComponent: React.FC<SwitchChallengeProps> = ({
   inputShapes,
   outputShapes,
   options,
@@ -260,4 +260,5 @@ export const SwitchChallenge: React.FC<SwitchChallengeProps> = ({
   );
 };
 
+export const SwitchChallenge = React.memo(SwitchChallengeComponent);
 export default SwitchChallenge;
