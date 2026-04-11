@@ -205,45 +205,48 @@ export const generateDigitChallenge = (count: number = 20): Question[] => {
 };
 
 /**
- * 生成 4x4 拉丁方阵 (每一行每一列没有重复元素)
+ * 生成拉丁方阵
+ * 保证每行每列元素不重复。支持 4x4 和 5x5。
  */
-const generateLatinSquare = (elements: ShapeType[]): ShapeType[][] => {
-  const size = 4;
+const generateLatinSquare = (elements: ShapeType[], size: 4 | 5): ShapeType[][] => {
   const grid: ShapeType[][] = Array.from({ length: size }, () => Array(size).fill(null));
   
-  // 预定义的几个绝对正确的 4x4 拉丁方阵数字模板 (0-3)
-  // 通过套用这些模板然后映射到真实的形状上，可以确保 100% 绝对不会有任何同行/同列重复
-  const templates = [
-    [
-      [0, 1, 2, 3],
-      [1, 0, 3, 2],
-      [2, 3, 0, 1],
-      [3, 2, 1, 0]
-    ],
-    [
-      [0, 1, 2, 3],
-      [2, 3, 0, 1],
-      [3, 2, 1, 0],
-      [1, 0, 3, 2]
-    ],
-    [
-      [0, 1, 2, 3],
-      [3, 2, 1, 0],
-      [1, 0, 3, 2],
-      [2, 3, 0, 1]
-    ]
-  ];
-  
-  // 随机挑一个模板
-  const template = templates[getRandomInt(0, templates.length - 1)];
-  
-  // 随机打乱传入的4个形状的映射关系
-  const mappedElements = shuffleArray(elements);
-  
-  // 根据模板填充网格
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size; j++) {
-      grid[i][j] = mappedElements[template[i][j]];
+  if (size === 4) {
+    const templates = [
+      [
+        [0, 1, 2, 3],
+        [1, 0, 3, 2],
+        [2, 3, 0, 1],
+        [3, 2, 1, 0]
+      ],
+      [
+        [0, 1, 2, 3],
+        [2, 3, 0, 1],
+        [3, 2, 1, 0],
+        [1, 0, 3, 2]
+      ],
+      [
+        [0, 1, 2, 3],
+        [3, 2, 1, 0],
+        [1, 0, 3, 2],
+        [2, 3, 0, 1]
+      ]
+    ];
+    const template = templates[getRandomInt(0, templates.length - 1)];
+    const mappedElements = shuffleArray(elements);
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+        grid[i][j] = mappedElements[template[i][j]];
+      }
+    }
+  } else if (size === 5) {
+    // 5x5 拉丁方阵标准模板 (循环移位法)
+    const mappedElements = shuffleArray(elements);
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+        // 使用 (i + j) % 5 可以生成完美的 5x5 拉丁方阵
+        grid[i][j] = mappedElements[(i + j) % 5];
+      }
     }
   }
   
@@ -259,29 +262,35 @@ export const generateGapChallenge = (count: number = 20): Question[] => {
   for (let i = 0; i < count; i++) {
     const difficulty = getRandomInt(1, 5);
     
-    // 选出4种不同的形状
-    const selectedShapes = shuffleArray(ALL_SHAPES).slice(0, 4);
+    // 根据难度决定是 4x4 还是 5x5 网格
+    const gridSize = difficulty <= 2 ? 4 : 5;
     
-    // 生成4x4拉丁方阵
-    const grid = generateLatinSquare(selectedShapes);
+    // 选出对应的形状种类
+    const selectedShapes = shuffleArray(ALL_SHAPES).slice(0, gridSize);
     
-    // 根据难度决定挖去几个洞 (虽然题目只问一个洞的答案，但可以挖去多个洞增加迷惑性)
-    const missingCount = difficulty <= 2 ? 1 : (difficulty <= 4 ? 3 : 5);
+    // 生成拉丁方阵
+    const grid = generateLatinSquare(selectedShapes, gridSize);
+    
+    // Gap Challenge 特点是“高度留白”，只给出少量线索
+    // 4x4 需要保留大概 5-6 个线索，5x5 需要保留大概 8-10 个线索
+    const totalCells = gridSize * gridSize;
+    const keepCount = gridSize === 4 ? getRandomInt(5, 6) : getRandomInt(8, 10);
+    const missingCount = totalCells - keepCount; // 要挖去的数量
     
     // 随机选出要挖去的位置
     const positions = [];
-    for (let r = 0; r < 4; r++) {
-      for (let c = 0; c < 4; c++) {
+    for (let r = 0; r < gridSize; r++) {
+      for (let c = 0; c < gridSize; c++) {
         positions.push({ row: r, col: c });
       }
     }
     const missingPositions = shuffleArray(positions).slice(0, missingCount);
     
-    // 第一个挖去的位置就是我们需要用户填写的
+    // 挖去的第一个位置作为目标 `?`
     const targetPos = missingPositions[0];
     const correctAnswer = grid[targetPos.row][targetPos.col];
     
-    // 将这些位置在 grid 中置为 null，除了 targetPos (前端可能会特殊渲染)
+    // 构建前端显示的网格
     const displayGrid: (ShapeType | null)[][] = JSON.parse(JSON.stringify(grid));
     missingPositions.forEach(pos => {
       displayGrid[pos.row][pos.col] = null;
