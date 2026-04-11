@@ -23,6 +23,8 @@ export const DigitChallenge: React.FC<DigitChallengeProps> = ({
   const placeholders = equation.match(/\?/g) || [];
   const placeholderCount = placeholders.length;
 
+  const actualPlaceholderCount = placeholderCount || 2;
+
   useEffect(() => {
     // 当题目切换时，重置所有状态
     setIsEditing(false);
@@ -37,7 +39,7 @@ export const DigitChallenge: React.FC<DigitChallengeProps> = ({
   }, [selectedAnswer]);
 
   const validateAnswer = (digits: string[]) => {
-    if (digits.length !== placeholderCount) return false;
+    if (digits.length !== actualPlaceholderCount) return false;
     
     let evalStr = equation;
     digits.forEach(d => {

@@ -96,6 +96,7 @@ export const updateAdaptiveState = (
   // 使用更科学的自适应步长，随着题目数量增加，难度调整幅度减小（模拟 IRT 信息增量衰减）
   const stepSize = Math.max(0.1, DIFFICULTY_ADJUSTMENT * (1 - (newQuestionHistory.length / 30)));
   
+  let newDifficulty = adaptiveState.currentDifficulty;
   if (isCorrect) {
     newDifficulty = Math.min(newDifficulty + stepSize, MAX_DIFFICULTY);
   } else {
