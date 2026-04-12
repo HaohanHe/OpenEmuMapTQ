@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Question, UserAnswer, QuizResult, QuizType } from '@/types';
 import { getQuestionsByType } from '@/data/questions';
+import { generateSwitchChallenge, generateScalesIx, generateGapChallenge, generateGridInductive, generateNumericalReasoning, generateApReasoning, generateDigitChallenge } from '@/utils/questionGenerators';
 import {
   AdaptiveTestState,
   initializeAdaptiveTest,
@@ -23,6 +24,7 @@ interface QuizState {
   allQuestions: Question[];
   
   // 计时器相关
+  timeLimit: number;
   timeRemaining: number;
   isTimerRunning: boolean;
   isExamMode: boolean;
@@ -56,6 +58,7 @@ export const useQuizStore = create<QuizState>()(
       isAdaptiveMode: false,
       adaptiveState: initializeAdaptiveTest(),
       allQuestions: [],
+      timeLimit: 600,
       timeRemaining: 600, // 10分钟
       isTimerRunning: false,
       isExamMode: false,
@@ -65,7 +68,39 @@ export const useQuizStore = create<QuizState>()(
       // 开始测试
       startQuiz: (type: QuizType, examMode = false, adaptiveMode = false) => {
         try {
-          const allQuestions = getQuestionsByType(type);
+          let allQuestions: Question[] = [];
+          
+          // 如果是支持动态生成的题型，则生成题库 (这里设置默认生成100题，模拟无限题库)
+          if (type === 'aon_deductive_switch') {
+            allQuestions = generateSwitchChallenge(100);
+          } else if (type === 'aon_inductive_scales') {
+            allQuestions = generateScalesIx(100);
+          } else if (type === 'aon_gap_challenge') {
+            allQuestions = generateGapChallenge(100);
+          } else if (type === 'aon_inductive_grid') {
+            allQuestions = generateGridInductive(100);
+          } else if (type === 'aon_numerical') {
+            allQuestions = generateNumericalReasoning(100);
+          } else if (type === 'aon_ap_reasoning') {
+            allQuestions = generateApReasoning(100);
+          } else if (type === 'aon_digit_challenge') {
+            allQuestions = generateDigitChallenge(100);
+          } else if (type === 'random') {
+            // 在快速开始/随机模式下，使用所有动态生成的题库
+            const dynamicQuestions = [
+              ...generateSwitchChallenge(15),
+              ...generateScalesIx(15),
+              ...generateGapChallenge(15),
+              ...generateGridInductive(15),
+              ...generateNumericalReasoning(15),
+              ...generateApReasoning(15),
+              ...generateDigitChallenge(15)
+            ];
+            // 打乱题库
+            allQuestions = dynamicQuestions.sort(() => 0.5 - Math.random());
+          } else {
+            allQuestions = getQuestionsByType(type);
+          }
           
           if (allQuestions.length === 0) {
             console.warn(`No questions found for quiz type: ${type}`);
@@ -87,28 +122,30 @@ export const useQuizStore = create<QuizState>()(
           switch (type) {
             case 'aon_verbal':
             case 'aon_numerical':
-              timeLimit = 360; // 6分钟
+              timeLimit = 720; // 真实测试：12分钟 (37/49题)
               break;
             case 'aon_inductive':
-              timeLimit = 300; // 5分钟
+            case 'aon_inductive_grid':
+            case 'aon_inductive_grid_fill':
+              timeLimit = 720; // cls 通常是12分钟
               break;
             case 'aon_deductive_switch':
-              timeLimit = 300; // 5分钟
+              timeLimit = 360; // lst 真实测试：6分钟 (15题或无限自适应)
               break;
             case 'aon_inductive_scales':
-              timeLimit = 240; // 4分钟
+              timeLimit = 300; // ix 真实测试：5分钟 (20题)
+              break;
+            case 'aon_gap_challenge':
+              timeLimit = 300; // sx 真实测试：5分钟
               break;
             case 'aon_ap_reasoning':
               timeLimit = 480; // 8分钟
               break;
-            case 'aon_gap_challenge':
-              timeLimit = 300; // 5分钟
-              break;
             case 'aon_digit_challenge':
-              timeLimit = 300; // 5分钟
+              timeLimit = 300; // eql 真实测试：5分钟 (15题或无限自适应)
               break;
             case 'aon_applied_numeracy':
-              timeLimit = 360; // 6分钟
+              timeLimit = 960; // tmt 真实测试：16分钟 (20题)
               break;
             case 'cognitive':
             case 'numerical':
@@ -127,6 +164,7 @@ export const useQuizStore = create<QuizState>()(
             isAdaptiveMode: adaptiveMode,
             adaptiveState: initialAdaptiveState,
             allQuestions,
+            timeLimit: timeLimit,
             timeRemaining: timeLimit,
             isTimerRunning: true,
             isExamMode: examMode,
@@ -144,7 +182,6 @@ export const useQuizStore = create<QuizState>()(
           const { questions, currentQuestionIndex, userAnswers } = get();
           
           if (questions.length === 0 || currentQuestionIndex < 0 || currentQuestionIndex >= questions.length) {
-            console.warn('Invalid question index or empty questions array');
             return;
           }
           
@@ -161,19 +198,45 @@ export const useQuizStore = create<QuizState>()(
           );
           
           const newUserAnswers = [...userAnswers];
+          // 特殊题型的答案验证逻辑 (如 Digit Challenge 有多个合法解)
+          let isCorrect = false;
+          if (currentQuestion.type === 'aon_digit_challenge' && currentQuestion.digitChallengeData) {
+            const { equation, placeholderCount } = currentQuestion.digitChallengeData;
+            const digits = answer.split('');
+            if (digits.length === placeholderCount) {
+              let evalStr = equation;
+              digits.forEach(d => {
+                evalStr = evalStr.replace('?', d);
+              });
+              const safeExpression = evalStr.replace(/=/g, '===')
+                                            .replace(/×/g, '*')
+                                            .replace(/÷/g, '/');
+              try {
+                if (/^[0-9+\-*/()\s=]+$/.test(safeExpression)) {
+                  isCorrect = Function(`'use strict'; return (${safeExpression})`)();
+                }
+              } catch (e) {
+                isCorrect = false;
+              }
+            }
+          } else {
+            // 普通题型直接对比字符串
+            isCorrect = answer === currentQuestion.correctAnswer;
+          }
+
           if (existingAnswerIndex >= 0) {
             // 更新已有答案
             newUserAnswers[existingAnswerIndex] = {
               questionId: currentQuestion.id,
               selectedAnswer: answer,
-              isCorrect: answer === currentQuestion.correctAnswer,
+              isCorrect,
             };
           } else {
             // 添加新答案
             newUserAnswers.push({
               questionId: currentQuestion.id,
               selectedAnswer: answer,
-              isCorrect: answer === currentQuestion.correctAnswer,
+              isCorrect,
             });
           }
           
@@ -194,6 +257,12 @@ export const useQuizStore = create<QuizState>()(
           }
           
           if (isAdaptiveMode) {
+            // 如果用户点击了“上一题”返回历史题目，再点击“下一题”时，直接递增索引，不要生成新题
+            if (currentQuestionIndex < questions.length - 1) {
+              set({ currentQuestionIndex: currentQuestionIndex + 1 });
+              return;
+            }
+
             if (currentQuestionIndex < 0 || currentQuestionIndex >= questions.length) {
               console.warn('Invalid question index');
               return;
@@ -264,7 +333,7 @@ export const useQuizStore = create<QuizState>()(
       // 提交测试
       submitQuiz: () => {
         try {
-          const { questions, userAnswers, quizType, timeRemaining } = get();
+          const { questions, userAnswers, quizType, timeLimit, timeRemaining } = get();
           
           if (questions.length === 0) {
             console.warn('No questions to submit');
@@ -280,7 +349,7 @@ export const useQuizStore = create<QuizState>()(
             quizType,
             totalQuestions: questions.length,
             correctAnswers,
-            timeSpent: Math.max(0, 600 - timeRemaining), // 确保时间不为负数
+            timeSpent: Math.max(0, timeLimit - timeRemaining), // 确保时间不为负数，且用正确的动态 timeLimit 计算
             userAnswers,
             completedAt: Date.now(),
           };
@@ -301,6 +370,7 @@ export const useQuizStore = create<QuizState>()(
           questions: [],
           currentQuestionIndex: 0,
           userAnswers: [],
+          timeLimit: 600,
           timeRemaining: 600,
           isTimerRunning: false,
           currentResult: null,
@@ -318,13 +388,13 @@ export const useQuizStore = create<QuizState>()(
       
       // 重做错题目
       retakeWrongQuestions: () => {
-        const { userAnswers, quizType } = get();
+        const { userAnswers, quizType, allQuestions, timeLimit } = get();
         const wrongQuestionIds = userAnswers
           .filter((ua) => !ua.isCorrect)
           .map((ua) => ua.questionId);
         
         if (wrongQuestionIds.length > 0) {
-          const allQuestions = getQuestionsByType(quizType);
+          // 直接从 allQuestions 状态中过滤错题，这样能兼容动态生成的题库
           const wrongQuestions = allQuestions.filter((q) => 
             wrongQuestionIds.includes(q.id)
           );
@@ -333,7 +403,7 @@ export const useQuizStore = create<QuizState>()(
             questions: wrongQuestions,
             currentQuestionIndex: 0,
             userAnswers: [],
-            timeRemaining: 300, // 5分钟
+            timeRemaining: timeLimit, // 使用当前测试类型的原定总时间
             isTimerRunning: true,
             currentResult: null,
           });
@@ -370,9 +440,36 @@ export const useQuizStore = create<QuizState>()(
     }),
     {
       name: 'aon-quiz-storage',
-      partialize: (state) => ({
-        results: state.results,
-      }),
+      // 取消仅持久化 results 的限制，改为持久化全部进度。
+      // 但对于包含了 Set 对象的 adaptiveState.usedQuestionIds，需要特殊序列化处理
+      storage: {
+        getItem: (name) => {
+          const str = localStorage.getItem(name);
+          if (!str) return null;
+          try {
+            const parsed = JSON.parse(str);
+            // 恢复 Set 对象
+            if (parsed.state?.adaptiveState?.usedQuestionIds) {
+              parsed.state.adaptiveState.usedQuestionIds = new Set(parsed.state.adaptiveState.usedQuestionIds);
+            }
+            return parsed;
+          } catch (e) {
+            return null;
+          }
+        },
+        setItem: (name, value) => {
+          // 转换 Set 为 Array 以便序列化
+          const stateToSave = { ...value };
+          if (stateToSave.state?.adaptiveState?.usedQuestionIds instanceof Set) {
+            const tempState = JSON.parse(JSON.stringify(stateToSave)); // 深拷贝
+            tempState.state.adaptiveState.usedQuestionIds = Array.from(stateToSave.state.adaptiveState.usedQuestionIds);
+            localStorage.setItem(name, JSON.stringify(tempState));
+            return;
+          }
+          localStorage.setItem(name, JSON.stringify(stateToSave));
+        },
+        removeItem: (name) => localStorage.removeItem(name),
+      },
     }
   )
 );

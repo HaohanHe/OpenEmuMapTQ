@@ -1,0 +1,2220 @@
+diff --git a/extract_pdf.py b/extract_pdf.py
+deleted file mode 100644
+index 6f3a3f3..0000000
+--- a/extract_pdf.py
++++ /dev/null
+@@ -1,84 +0,0 @@
+-
+-import os
+-import pdfplumber
+-from PIL import Image
+-import io
+-
+-pdf_files = [
+-    'practice-tasks---numerical-reasoning.pdf',
+-    'practice-tasks---verbal-reasoning.pdf',
+-    'practice-tasks---inductive-logical-reasoning-scales-clx.pdf',
+-    'practice-tasks--deductive-numeracy-digitchallenge.pdf',
+-    'practice-tasks--deductive-reasoning-gapchallenge.pdf',
+-    'practice-tasks--deductive-reasoning-switchchallenge.pdf',
+-    'practice-tasks--inductive-reasoning-ix.pdf',
+-    'practice-tasks-applied-numeracy.pdf',
+-    'practice-tasks---ap-reasoning.pdf'
+-]
+-
+-output_dir = 'pdf_extracts'
+-os.makedirs(output_dir, exist_ok=True)
+-
+-for pdf_file in pdf_files:
+-    print(f"\n{'='*60}")
+-    print(f"Processing: {pdf_file}")
+-    print('='*60)
+-    
+-    try:
+-        with pdfplumber.open(pdf_file) as pdf:
+-            text_content = []
+-            image_count = 0
+-            
+-            # Create image directory for this PDF
+-            pdf_name = os.path.splitext(pdf_file)[0]
+-            image_dir = os.path.join(output_dir, f"{pdf_name}_images")
+-            os.makedirs(image_dir, exist_ok=True)
+-            
+-            for page_num, page in enumerate(pdf.pages, 1):
+-                print(f"\n--- Page {page_num} ---")
+-                
+-                # Extract text
+-                text = page.extract_text()
+-                if text:
+-                    print(text[:500] + '...' if len(text) > 500 else text)
+-                    text_content.append(f"\n--- Page {page_num} ---\n{text}")
+-                
+-                # Extract images
+-                images = page.images
+-                if images:
+-                    print(f"  Found {len(images)} image(s) on this page")
+-                    for img_num, img in enumerate(images, 1):
+-                        try:
+-                            # Get image data
+-                            x0, top, x1, bottom = img['x0'], img['top'], img['x1'], img['bottom']
+-                            width = img['width']
+-                            height = img['height']
+-                            
+-                            # Crop the image from the page
+-                            im = page.within_bbox((x0, top, x1, bottom)).to_image()
+-                            
+-                            # Save the image
+-                            img_filename = f"page{page_num}_img{img_num}.png"
+-                            img_path = os.path.join(image_dir, img_filename)
+-                            im.save(img_path)
+-                            print(f"    Saved image: {img_path}")
+-                            image_count += 1
+-                        except Exception as img_error:
+-                            print(f"    Error saving image: {img_error}")
+-            
+-            # Save text to file
+-            if text_content:
+-                text_file = os.path.join(output_dir, f"{pdf_name}_text.txt")
+-                with open(text_file, 'w', encoding='utf-8') as f:
+-                    f.write('\n'.join(text_content))
+-                print(f"\nText saved to: {text_file}")
+-            
+-            print(f"\nTotal images found in {pdf_file}: {image_count}")
+-            
+-    except Exception as e:
+-        print(f"Error processing {pdf_file}: {e}")
+-
+-print(f"\n{'='*60}")
+-print("Extraction complete!")
+-print(f"Results saved to: {output_dir}")
+-print('='*60)
+diff --git a/extract_pdf_images.py b/extract_pdf_images.py
+deleted file mode 100644
+index 8898ef7..0000000
+--- a/extract_pdf_images.py
++++ /dev/null
+@@ -1,56 +0,0 @@
+-import os
+-import pdfplumber
+-from PIL import Image
+-import io
+-
+-pdf_files = [
+-    'practice-tasks---numerical-reasoning.pdf',
+-    'practice-tasks---verbal-reasoning.pdf',
+-    'practice-tasks---inductive-logical-reasoning-scales-clx.pdf',
+-    'practice-tasks--deductive-numeracy-digitchallenge.pdf',
+-    'practice-tasks--deductive-reasoning-gapchallenge.pdf',
+-    'practice-tasks--deductive-reasoning-switchchallenge.pdf',
+-    'practice-tasks--inductive-reasoning-ix.pdf',
+-    'practice-tasks-applied-numeracy.pdf',
+-    'practice-tasks---ap-reasoning.pdf'
+-]
+-
+-output_dir = 'pdf_images'
+-os.makedirs(output_dir, exist_ok=True)
+-
+-for pdf_file in pdf_files:
+-    print(f"\n{'='*60}")
+-    print(f"Processing: {pdf_file}")
+-    print('='*60)
+-    
+-    try:
+-        with pdfplumber.open(pdf_file) as pdf:
+-            image_count = 0
+-            
+-            for page_num, page in enumerate(pdf.pages, 1):
+-                images = page.images
+-                if images:
+-                    print(f"Page {page_num}: Found {len(images)} image(s)")
+-                    
+-                    for img_idx, img in enumerate(images, 1):
+-                        image_count += 1
+-                        # Extract image
+-                        x0, top, x1, bottom = img['x0'], img['top'], img['x1'], img['bottom']
+-                        image = page.within_bbox((x0, top, x1, bottom)).to_image()
+-                        
+-                        # Save image
+-                        pdf_name = os.path.splitext(pdf_file)[0]
+-                        img_filename = f"{pdf_name}_page{page_num}_img{img_idx}.png"
+-                        img_path = os.path.join(output_dir, img_filename)
+-                        image.save(img_path)
+-                        print(f"  Saved: {img_filename}")
+-            
+-            print(f"\nTotal images extracted from {pdf_file}: {image_count}")
+-            
+-    except Exception as e:
+-        print(f"Error processing {pdf_file}: {e}")
+-
+-print(f"\n{'='*60}")
+-print("Image extraction complete!")
+-print(f"Images saved to: {output_dir}")
+-print('='*60)
+diff --git a/index.html b/index.html
+index 7650e18..dcb4d08 100644
+--- a/index.html
++++ b/index.html
+@@ -3,8 +3,10 @@
+   <head>
+     <meta charset="UTF-8" />
+     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-    <title>My Trae Project</title>
++    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
++    <title>Aon Test</title>
++    <link rel="apple-touch-icon" href="/icon-192x192.png">
++    <meta name="theme-color" content="#0f172a">
+     <script type="module">
+       if (import.meta.hot?.on) {
+         import.meta.hot.on('vite:error', (error) => {
+diff --git a/package.json b/package.json
+index 64449c9..a4b54de 100644
+--- a/package.json
++++ b/package.json
+@@ -35,7 +35,10 @@
+     "typescript": "~5.8.3",
+     "typescript-eslint": "^8.30.1",
+     "vite": "^6.3.5",
++    "vite-plugin-pwa": "^1.2.0",
+     "vite-plugin-trae-solo-badge": "^1.0.0",
+-    "vite-tsconfig-paths": "^5.1.4"
++    "vite-tsconfig-paths": "^5.1.4",
++    "workbox-core": "^7.4.0",
++    "workbox-window": "^7.4.0"
+   }
+ }
+diff --git a/public/icon-192x192.png b/public/icon-192x192.png
+new file mode 100644
+index 0000000..0462b84
+Binary files /dev/null and b/public/icon-192x192.png differ
+diff --git a/public/icon-512x512.png b/public/icon-512x512.png
+new file mode 100644
+index 0000000..19f16b9
+Binary files /dev/null and b/public/icon-512x512.png differ
+diff --git a/src/components/DigitChallenge.tsx b/src/components/DigitChallenge.tsx
+index 16e57f5..b109a13 100644
+--- a/src/components/DigitChallenge.tsx
++++ b/src/components/DigitChallenge.tsx
+@@ -23,6 +23,8 @@ export const DigitChallenge: React.FC<DigitChallengeProps> = ({
+   const placeholders = equation.match(/\?/g) || [];
+   const placeholderCount = placeholders.length;
+ 
++  const actualPlaceholderCount = placeholderCount || 2;
++
+   useEffect(() => {
+     // 当题目切换时，重置所有状态
+     setIsEditing(false);
+@@ -36,33 +38,28 @@ export const DigitChallenge: React.FC<DigitChallengeProps> = ({
+     }
+   }, [selectedAnswer]);
+ 
+-  const validateAnswer = (inputDigits: string[]) => {
+-    let equationStr = equation;
+-    inputDigits.forEach(digit => {
+-      equationStr = equationStr.replace('?', digit);
++  const validateAnswer = (digits: string[]) => {
++    if (digits.length !== actualPlaceholderCount) return false;
++    
++    let evalStr = equation;
++    digits.forEach(d => {
++      evalStr = evalStr.replace('?', d);
+     });
+     
++    // 安全地计算表达式，兼容中英文符号和除号
++    const safeExpression = evalStr.replace(/=/g, '===')
++                                  .replace(/×/g, '*')
++                                  .replace(/÷/g, '/');
++    
+     try {
+-      // 计算结果
+-      const parts = equationStr.split('=');
+-      const expression = parts[0].trim();
+-      const targetStr = parts[1].trim();
+-      
+-      // 替换中文乘号为英文乘号
+-      const safeExpression = expression.replace(/×/g, '*');
+-      
+-      // 安全计算 - 只允许数字和基本运算符
+-      if (!/^[0-9+\-*/()\s]+$/.test(safeExpression)) {
+-        return false;
++      // 允许额外的 / 符号
++      if (/^[0-9+\-*/()\s=]+$/.test(safeExpression)) {
++        return Function(`'use strict'; return (${safeExpression})`)();
+       }
+-      
+-      const result = eval(safeExpression);
+-      const target = parseInt(targetStr);
+-      return result === target;
+-    } catch (error) {
+-      console.error('计算错误:', error);
+-      return false;
++    } catch (e) {
++      console.error('Invalid expression', e);
+     }
++    return false;
+   };
+ 
+   const handleDigitClick = (digit: string) => {
+@@ -87,6 +84,11 @@ export const DigitChallenge: React.FC<DigitChallengeProps> = ({
+       const newInput = input.slice(0, -1);
+       setInput(newInput);
+       setUsedDigits(usedDigits.filter(d => d !== lastDigit));
++      
++      // 如果之前已经提交了答案，删除时清空全局状态
++      if (input.length === placeholderCount) {
++        onSelect?.('');
++      }
+     }
+   };
+ 
+diff --git a/src/components/GridChallenge.tsx b/src/components/GridChallenge.tsx
+index 46d6a2e..fad8a07 100644
+--- a/src/components/GridChallenge.tsx
++++ b/src/components/GridChallenge.tsx
+@@ -25,28 +25,28 @@ export const GridChallenge: React.FC<GridChallengeProps> = ({
+   };
+ 
+   const getButtonClass = (shape: string) => {
+-    if (!selectedAnswer) {
+-      return 'bg-primary-800/80 border-primary-600 hover:bg-primary-800';
++    if (shape === selectedAnswer) {
++      return 'bg-blue-500/30 border-blue-400 text-blue-300';
+     }
+-    if (shape === correctAnswer) {
+-      return 'bg-success/20 border-success text-success';
+-    }
+-    if (shape === selectedAnswer && shape !== correctAnswer) {
+-      return 'bg-error/20 border-error text-error';
+-    }
+-    return 'bg-primary-800/50 border-primary-700 hover:bg-primary-800';
++    return 'bg-primary-800/80 border-primary-600 hover:bg-primary-800';
+   };
+ 
+   const getShapeColor = (shape: string) => {
+     switch (shape) {
+-      case 'circle': return '#7C3AED';
+-      case 'triangle': return '#10B981';
+-      case 'cross': return '#F59E0B';
+-      case 'star': return '#06B6D4';
++      case 'circle': return '#A855F7'; // Purple
++      case 'triangle': return '#84CC16'; // Green
++      case 'cross': return '#F97316'; // Orange
++      case 'star': return '#06B6D4'; // Cyan
++      case 'square': return '#EC4899'; // Pink/Magenta
++      case 'diamond': return '#EF4444'; // Red
++      case 'hexagon': return '#3B82F6'; // Blue
++      case 'x': return '#EAB308'; // Yellow
+       default: return '#FFFFFF';
+     }
+   };
+ 
++  const gridSize = grid.length;
++
+   return (
+     <div className="space-y-10">
+       {/* 题目说明 */}
+@@ -57,25 +57,29 @@ export const GridChallenge: React.FC<GridChallengeProps> = ({
+ 
+       {/* 网格 */}
+       <div className="flex justify-center">
+-        <div className="bg-primary-800/30 p-6 rounded-2xl border border-primary-600">
+-          <div className="grid grid-cols-4 gap-4">
++        <div className="bg-white p-2 rounded-lg border border-gray-300 shadow-md">
++          <div 
++            className="grid gap-1 bg-gray-200 p-1" 
++            style={{ gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))` }}
++          >
+             {grid.map((row, rowIndex) => (
+-              row.map((shape, colIndex) => (
+-                <div
+-                  key={`${rowIndex}-${colIndex}`}
+-                  className={`w-20 h-20 flex items-center justify-center border-2 rounded-lg transition-all duration-300 ${
+-                    rowIndex === missingPosition.row && colIndex === missingPosition.col
+-                      ? 'border-dashed border-primary-400 bg-primary-800/20'
+-                      : 'border-primary-600 bg-primary-800/40'
+-                  }`}
+-                >
+-                  {rowIndex === missingPosition.row && colIndex === missingPosition.col ? (
+-                    <div className="text-4xl text-primary-400 font-bold">?</div>
+-                  ) : shape ? (
+-                    <Shape type={shape} size={50} color={getShapeColor(shape)} />
+-                  ) : null}
+-                </div>
+-              ))
++              row.map((shape, colIndex) => {
++                const isTarget = rowIndex === missingPosition.row && colIndex === missingPosition.col;
++                return (
++                  <div
++                    key={`${rowIndex}-${colIndex}`}
++                    className={`w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center bg-white ${
++                      isTarget ? 'bg-gray-100' : ''
++                    }`}
++                  >
++                    {isTarget ? (
++                      <div className="text-3xl text-gray-700 font-medium">?</div>
++                    ) : shape ? (
++                      <Shape type={shape} size={36} color={getShapeColor(shape)} />
++                    ) : null}
++                  </div>
++                );
++              })
+             ))}
+           </div>
+         </div>
+@@ -83,19 +87,24 @@ export const GridChallenge: React.FC<GridChallengeProps> = ({
+ 
+       {/* 选项 */}
+       <div className="mt-10">
+-        <div className="text-center mb-6">
+-          <h3 className="text-lg font-semibold text-primary-300 mb-2">{language === 'zh' ? '选择正确的形状' : 'Select the correct shape'}</h3>
+-        </div>
+-        <div className="flex justify-center gap-6">
+-          {options.map((shape, index) => (
+-            <button
+-              key={index}
+-              onClick={() => handleSelect(shape)}
+-              className={`p-5 rounded-xl border-3 transition-all duration-300 hover:scale-110 bg-primary-700/50 ${getButtonClass(shape)}`}
+-            >
+-              <Shape type={shape} size={55} color={getShapeColor(shape)} />
+-            </button>
+-          ))}
++        <div className="flex justify-center">
++          <div className="bg-[#a8c7c9] p-2 rounded-lg shadow-inner">
++            <div className="flex bg-white rounded gap-2 sm:gap-4 p-2">
++              {options.map((shape, index) => (
++                <button
++                  key={index}
++                  onClick={() => handleSelect(shape)}
++                  className={`p-3 sm:p-4 rounded border-2 transition-all duration-200 ${
++                    shape === selectedAnswer 
++                      ? 'border-blue-500 bg-blue-50 scale-105 shadow-md' 
++                      : 'border-transparent hover:bg-gray-50 hover:scale-105'
++                  }`}
++                >
++                  <Shape type={shape} size={40} color={getShapeColor(shape)} />
++                </button>
++              ))}
++            </div>
++          </div>
+         </div>
+       </div>
+     </div>
+diff --git a/src/components/GridInductive.tsx b/src/components/GridInductive.tsx
+index 35c6e34..7f0a8cc 100644
+--- a/src/components/GridInductive.tsx
++++ b/src/components/GridInductive.tsx
+@@ -1,5 +1,6 @@
+ import React, { useState, useEffect } from 'react';
+-import Shape from './Shape';
++import { Shape } from './Shape';
++import { useLanguageStore } from '@/store/languageStore';
+ 
+ interface GridInductiveProps {
+   exampleGrids: (string | null)[][][];
+@@ -16,6 +17,7 @@ export const GridInductive: React.FC<GridInductiveProps> = ({
+   selectedAnswer,
+   onSelect
+ }) => {
++  const { language } = useLanguageStore();
+   const [selectedGrids, setSelectedGrids] = useState<number[]>([]);
+ 
+   useEffect(() => {
+@@ -40,21 +42,16 @@ export const GridInductive: React.FC<GridInductiveProps> = ({
+     if (newSelected.length === 2) {
+       const answer = newSelected.sort((a, b) => a - b).join(',');
+       onSelect?.(answer);
++    } else {
++      onSelect?.('');
+     }
+   };
+ 
+   const getGridClass = (index: number) => {
+-    if (selectedAnswer) {
+-      const correctIndices = correctAnswer.split(',').map(Number);
+-      if (correctIndices.includes(index)) {
+-        return 'border-yellow-500 bg-yellow-400/20';
+-      } else if (selectedGrids.includes(index)) {
+-        return 'border-error bg-error/20';
+-      }
+-    } else if (selectedGrids.includes(index)) {
+-      return 'border-blue-400 bg-blue-500/20';
++    if (selectedGrids.includes(index)) {
++      return 'border-blue-400 bg-blue-500/30 text-blue-300 shadow-[0_0_15px_rgba(59,130,246,0.3)]';
+     }
+-    return 'border-gray-600 bg-gray-800/60';
++    return 'border-gray-600 bg-gray-800/60 hover:bg-gray-700/80 transition-colors';
+   };
+ 
+   const getShapeColor = (shape: string) => {
+@@ -122,7 +119,7 @@ export const GridInductive: React.FC<GridInductiveProps> = ({
+         {/* 示例网格 */}
+         <div className="flex flex-col items-center">
+           <div className="text-sm font-semibold text-gray-300 mb-3">
+-            These two grids follow a rule
++            {language === 'zh' ? '这两个网格遵循同一规律' : 'These two grids follow a rule'}
+           </div>
+           <div className="space-y-3">
+             {exampleGrids.map((grid, index) => (
+@@ -136,7 +133,7 @@ export const GridInductive: React.FC<GridInductiveProps> = ({
+         {/* 问题网格 */}
+         <div className="flex flex-col items-center">
+           <div className="text-sm font-semibold text-gray-300 mb-3">
+-            Which two of these grids follow the same rule?
++            {language === 'zh' ? '以下哪两个网格遵循相同的规律？' : 'Which two of these grids follow the same rule?'}
+           </div>
+           <div className="grid grid-cols-2 gap-3">
+             {questionGrids.map((grid, index) => (
+@@ -149,11 +146,11 @@ export const GridInductive: React.FC<GridInductiveProps> = ({
+       </div>
+ 
+       {/* 选择提示 */}
+-      <div className="text-center">
+-        <p className="text-gray-300 text-sm">
+-          {selectedGrids.length === 0 && 'Please select two grids'}
+-          {selectedGrids.length === 1 && `Selected grid: ${selectedGrids[0]}, please select one more`}
+-          {selectedGrids.length === 2 && `Selected grids: ${selectedGrids.sort((a, b) => a - b).join(' and ')}`}
++      <div className="text-center mt-4">
++        <p className="text-primary-300 text-sm font-medium">
++          {selectedGrids.length === 0 && (language === 'zh' ? '请选择两个网格' : 'Please select two grids')}
++          {selectedGrids.length === 1 && (language === 'zh' ? '请再选择一个网格' : 'Please select one more grid')}
++          {selectedGrids.length === 2 && (language === 'zh' ? '选择完成' : 'Selection complete')}
+         </p>
+       </div>
+     </div>
+diff --git a/src/components/NumericalReasoning.tsx b/src/components/NumericalReasoning.tsx
+index 899aebf..4f168b7 100644
+--- a/src/components/NumericalReasoning.tsx
++++ b/src/components/NumericalReasoning.tsx
+@@ -1,4 +1,4 @@
+-import React from 'react';
++import React, { useState, useEffect } from 'react';
+ 
+ interface NumericalReasoningProps {
+   content: string;
+@@ -9,6 +9,27 @@ interface NumericalReasoningProps {
+   onSelect?: (answer: string) => void;
+ }
+ 
++// 解析带有 [TAB:Tab名称] 标记的数据
++const parseTabsData = (dataSheet: string) => {
++  const tabs: { name: string, content: string }[] = [];
++  const parts = dataSheet.split(/\[TAB:(.*?)\]\n/);
++  
++  // 如果没有找到 TAB 标记，就当成单一数据页
++  if (parts.length <= 1) {
++    return [{ name: 'Data', content: dataSheet }];
++  }
++
++  // parts[0] 通常是空的，然后是 name, content 交替出现
++  for (let i = 1; i < parts.length; i += 2) {
++    tabs.push({
++      name: parts[i],
++      content: parts[i + 1].trim()
++    });
++  }
++  
++  return tabs;
++};
++
+ export const NumericalReasoning: React.FC<NumericalReasoningProps> = ({
+   content,
+   dataSheet,
+@@ -17,41 +38,44 @@ export const NumericalReasoning: React.FC<NumericalReasoningProps> = ({
+   correctAnswer,
+   onSelect
+ }) => {
++  const [activeTab, setActiveTab] = useState<number>(0);
++  const tabs = parseTabsData(dataSheet);
++
++  // 当题目切换时（dataSheet改变），重置选中的Tab
++  useEffect(() => {
++    setActiveTab(0);
++  }, [dataSheet]);
+ 
+   const handleSelect = (option: string) => {
+     onSelect?.(option);
+   };
+ 
+-  // 渲染数据表格或图表
+-  const renderDataSheet = () => {
+-    // 检查是否包含图表标记
+-    if (dataSheet.includes('[CHART]')) {
+-      return (
+-        <div className="mb-8 p-6 bg-primary-800/60 rounded-xl border border-primary-700">
+-          <div className="text-center">
+-            <div className="w-64 h-48 bg-primary-700/40 rounded-lg flex items-center justify-center mb-4">
+-              <div className="text-primary-300">图表区域</div>
+-            </div>
+-            <p className="text-sm text-primary-300">{dataSheet.replace('[CHART]', '').trim()}</p>
+-          </div>
+-        </div>
+-      );
+-    }
+-    
++  const renderContent = (tabContent: string) => {
+     // 检查是否包含表格标记
+-    if (dataSheet.includes('[TABLE]')) {
++    if (tabContent.includes('[TABLE]')) {
++      const tableLines = tabContent.replace('[TABLE]', '').trim().split('\n');
+       return (
+-        <div className="mb-8 p-6 bg-primary-800/60 rounded-xl border border-primary-700 overflow-x-auto">
+-          <table className="w-full text-sm">
++        <div className="overflow-x-auto w-full">
++          <table className="w-full text-sm border-collapse">
+             <tbody>
+-              {dataSheet.replace('[TABLE]', '').trim().split('\n').map((row, rowIndex) => {
++              {tableLines.map((row, rowIndex) => {
+                 if (!row.trim()) return null;
++                // 有些附加信息可能不包含 "|"
++                if (!row.includes('|')) {
++                  return (
++                    <tr key={rowIndex}>
++                      <td colSpan={10} className="py-2 px-4 text-left text-primary-300 italic text-xs">
++                        {row.trim()}
++                      </td>
++                    </tr>
++                  );
++                }
+                 const cells = row.split('|').map(cell => cell.trim());
+                 return (
+-                  <tr key={rowIndex} className={rowIndex === 0 ? 'border-b border-primary-600' : ''}>
++                  <tr key={rowIndex} className={rowIndex === 0 ? 'border-b-2 border-primary-500 bg-primary-800/80' : 'border-b border-primary-700/50 hover:bg-primary-800/30 transition-colors'}>
+                     {cells.map((cell, cellIndex) => (
+-                      <td key={cellIndex} className="py-2 px-4 text-left">
+-                        <span className={rowIndex === 0 ? 'font-semibold text-primary-300' : 'text-primary-200'}>
++                      <td key={cellIndex} className={`py-3 px-4 ${cellIndex === 0 ? 'text-left font-medium text-primary-200' : 'text-right'}`}>
++                        <span className={rowIndex === 0 ? 'font-bold text-primary-100' : 'text-primary-200 font-mono'}>
+                           {cell}
+                         </span>
+                       </td>
+@@ -67,52 +91,68 @@ export const NumericalReasoning: React.FC<NumericalReasoningProps> = ({
+     
+     // 默认文本形式
+     return (
+-      <div className="mb-6 p-4 bg-primary-800/60 rounded-lg border border-primary-700">
+-        <div className="text-sm text-primary-200 whitespace-pre-wrap">
+-          {dataSheet}
+-        </div>
++      <div className="text-sm text-primary-200 whitespace-pre-wrap leading-relaxed">
++        {tabContent}
+       </div>
+     );
+   };
+ 
+   return (
+-    <div className="space-y-6">
+-      {/* 数据表格或图表 */}
+-      {renderDataSheet()}
++    <div className="space-y-6 max-w-4xl mx-auto">
++      {/* 多标签页 UI */}
++      <div className="bg-primary-900/50 rounded-xl border border-primary-700 overflow-hidden shadow-lg shadow-primary-900/20">
++        {tabs.length > 1 && (
++          <div className="flex overflow-x-auto hide-scrollbar border-b border-primary-700 bg-primary-900/80">
++            {tabs.map((tab, index) => (
++              <button
++                key={index}
++                onClick={() => setActiveTab(index)}
++                className={`px-6 py-3 text-sm font-medium whitespace-nowrap transition-all duration-200 border-b-2 ${
++                  activeTab === index 
++                    ? 'border-blue-400 text-blue-300 bg-blue-900/20' 
++                    : 'border-transparent text-primary-400 hover:text-primary-200 hover:bg-primary-800/50'
++                }`}
++              >
++                {tab.name}
++              </button>
++            ))}
++          </div>
++        )}
++        
++        <div className="p-6 bg-primary-800/40 min-h-[300px] flex flex-col justify-center">
++          {renderContent(tabs[activeTab].content)}
++        </div>
++      </div>
+ 
+-      {/* 问题 */}
+-      <div className="p-6 bg-primary-800/40 rounded-xl border border-primary-700">
+-        <h3 className="text-lg font-semibold mb-6 text-white">{content}</h3>
++      {/* 问题区域 */}
++      <div className="p-6 bg-primary-800/60 rounded-xl border border-primary-600 shadow-md">
++        <div className="mb-6 flex items-start">
++          <div className="bg-blue-500/20 p-2 rounded-lg mr-4 mt-1 border border-blue-500/30">
++            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
++              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
++            </svg>
++          </div>
++          <h3 className="text-xl font-bold text-white leading-snug">{content}</h3>
++        </div>
+ 
+         {/* 选项 */}
+-        <div className="grid grid-cols-2 gap-4">
++        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+           {options.map((option, index) => {
+             const isSelected = selectedAnswer === option;
+             const isCorrect = selectedAnswer && option === correctAnswer;
+-            const optionLabel = String.fromCharCode(65 + index); // A, B, C, D
+ 
+             return (
+               <button
+                 key={index}
+                 onClick={() => handleSelect(option)}
+-                className={`p-4 rounded-lg border-2 transition-all duration-300 text-left ${isSelected
++                className={`px-4 py-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-center font-medium text-lg ${isSelected
+                   ? isCorrect
+-                    ? 'bg-yellow-400/30 border-yellow-500 text-yellow-300'
+-                    : 'bg-error/20 border-error text-error'
+-                  : 'bg-primary-800/60 border-primary-600 hover:bg-primary-800 hover:border-primary-500'
++                    ? 'bg-success/20 border-success text-success shadow-[0_0_15px_rgba(16,185,129,0.3)]'
++                    : 'bg-error/20 border-error text-error shadow-[0_0_15px_rgba(239,68,68,0.3)]'
++                  : 'bg-primary-700/50 border-primary-600 text-primary-200 hover:bg-primary-700 hover:border-primary-400 hover:text-white'
+                   }`}
+               >
+-                <div className="flex items-start">
+-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0 ${isSelected
+-                    ? isCorrect
+-                      ? 'bg-yellow-500 text-white'
+-                      : 'bg-error text-white'
+-                    : 'border-2 border-primary-500 text-primary-300'
+-                    }`}>
+-                    {optionLabel}
+-                  </div>
+-                  <span className="font-medium">{option}</span>
+-                </div>
++                {option}
+               </button>
+             );
+           })}
+diff --git a/src/components/ScalesIx.tsx b/src/components/ScalesIx.tsx
+index c24b35c..516886a 100644
+--- a/src/components/ScalesIx.tsx
++++ b/src/components/ScalesIx.tsx
+@@ -22,22 +22,10 @@ export const ScalesIx: React.FC<ScalesIxProps> = ({
+   };
+ 
+   const getButtonClass = (index: number) => {
+-    const isSelected = selectedAnswer === index;
+-    const isCorrect = index === oddOneOutIndex;
+-    
+-    if (selectedAnswer === undefined) {
+-      return 'bg-gray-800/60 border-gray-600 hover:bg-gray-700 hover:border-gray-500';
++    if (selectedAnswer === index) {
++      return 'bg-blue-500/30 border-blue-400 text-blue-300';
+     }
+-    
+-    if (isCorrect) {
+-      return 'bg-yellow-400/30 border-yellow-500 text-yellow-300';
+-    }
+-    
+-    if (isSelected && !isCorrect) {
+-      return 'bg-error/20 border-error text-error';
+-    }
+-    
+-    return 'bg-gray-800/40 border-gray-700';
++    return 'bg-gray-800/60 border-gray-600 hover:bg-gray-700 hover:border-gray-500';
+   };
+ 
+   return (
+@@ -52,26 +40,17 @@ export const ScalesIx: React.FC<ScalesIxProps> = ({
+       </div>
+ 
+       {/* 9个图形网格 */}
+-      <div className="flex justify-center">
+-        <div className="grid grid-cols-9 gap-3">
++      <div className="flex justify-center w-full overflow-x-auto pb-4 hide-scrollbar">
++        <div className="flex flex-nowrap gap-2 sm:gap-3 px-2 min-w-max">
+           {allShapes.map((shape, index) => (
+-            <button
+-              key={index}
+-              onClick={() => handleSelect(index)}
+-              className={`p-3 rounded-lg border-2 transition-all duration-300 flex items-center justify-center ${getButtonClass(index)}`}
+-            >
+-              <Shape type={shape} size={40} />
+-            </button>
+-          ))}
+-        </div>
+-      </div>
+-
+-      {/* 数字标记 */}
+-      <div className="flex justify-center">
+-        <div className="grid grid-cols-9 gap-3 w-full max-w-2xl">
+-          {allShapes.map((_, index) => (
+-            <div key={index} className="text-center">
+-              <span className="text-xs text-gray-500">{index + 1}</span>
++            <div key={index} className="flex flex-col items-center gap-2">
++              <button
++                onClick={() => handleSelect(index)}
++                className={`p-2 sm:p-3 rounded-lg border-2 transition-all duration-300 flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 ${getButtonClass(index)}`}
++              >
++                <Shape type={shape} size={32} />
++              </button>
++              <span className="text-xs text-gray-500 font-mono">{index + 1}</span>
+             </div>
+           ))}
+         </div>
+diff --git a/src/components/SwitchChallenge.tsx b/src/components/SwitchChallenge.tsx
+index 26489d9..98ee000 100644
+--- a/src/components/SwitchChallenge.tsx
++++ b/src/components/SwitchChallenge.tsx
+@@ -16,7 +16,7 @@ interface SwitchChallengeProps {
+   isMultiStep?: boolean;
+ }
+ 
+-export const SwitchChallenge: React.FC<SwitchChallengeProps> = ({
++export const SwitchChallengeComponent: React.FC<SwitchChallengeProps> = ({
+   inputShapes,
+   outputShapes,
+   options,
+@@ -50,47 +50,43 @@ export const SwitchChallenge: React.FC<SwitchChallengeProps> = ({
+   };
+ 
+   const checkAndSubmit = (first: string, second: string) => {
+-    if (first && second && correctAnswer) {
++    if (first && second) {
+       const combinedAnswer = `${first}-${second}`;
+-      if (combinedAnswer === correctAnswer) {
+-        onSelect?.(combinedAnswer);
+-      }
++      onSelect?.(combinedAnswer);
+     }
+   };
+ 
+   const getButtonClass = (option: string) => {
+-    if (!selectedAnswer) {
+-      return 'bg-gray-700 border-gray-600 hover:bg-gray-600';
+-    }
+-    if (option === correctAnswer) {
+-      return 'bg-yellow-400/30 border-yellow-500 text-yellow-300';
+-    }
+-    if (option === selectedAnswer && option !== correctAnswer) {
+-      return 'bg-error/20 border-error text-error';
++    if (option === selectedAnswer) {
++      return 'bg-blue-500/30 border-blue-400 text-blue-300';
+     }
+     return 'bg-gray-800/60 border-gray-700 hover:bg-gray-700';
+   };
+ 
+   const getFirstCodeClass = (option: string) => {
+     if (option === selectedFirstCode) {
+-      return 'bg-gray-600 border-gray-500';
++      return 'bg-blue-500/30 border-blue-400 text-blue-300';
+     }
+     return 'bg-gray-800/60 border-gray-700 hover:bg-gray-700';
+   };
+ 
+   const getSecondCodeClass = (option: string) => {
+     if (option === selectedSecondCode) {
+-      return 'bg-gray-600 border-gray-500';
++      return 'bg-blue-500/30 border-blue-400 text-blue-300';
+     }
+     return 'bg-gray-800/60 border-gray-700 hover:bg-gray-700';
+   };
+ 
+   const getShapeColor = (shape: string) => {
+     switch (shape) {
+-      case 'circle': return '#EF4444';
+-      case 'triangle': return '#3B82F6';
+-      case 'cross': return '#F59E0B';
+-      case 'star': return '#8B5CF6';
++      case 'circle': return '#EF4444'; // Red
++      case 'triangle': return '#3B82F6'; // Blue
++      case 'cross': return '#F59E0B'; // Yellow/Orange
++      case 'star': return '#8B5CF6'; // Purple
++      case 'diamond': return '#10B981'; // Green
++      case 'hexagon': return '#EC4899'; // Pink
++      case 'square': return '#06B6D4'; // Cyan
++      case 'x': return '#F97316'; // Orange
+       default: return '#FFFFFF';
+     }
+   };
+@@ -264,4 +260,5 @@ export const SwitchChallenge: React.FC<SwitchChallengeProps> = ({
+   );
+ };
+ 
++export const SwitchChallenge = React.memo(SwitchChallengeComponent);
+ export default SwitchChallenge;
+diff --git a/src/data/questions.ts b/src/data/questions.ts
+index e9b5d00..80df4ba 100644
+--- a/src/data/questions.ts
++++ b/src/data/questions.ts
+@@ -3006,6 +3006,12 @@ function generateGridFillQuestions(): Question[] {
+ 
+ export const gridFillQuestions = generateGridFillQuestions();
+ 
++// ============================================================================
++// 注意：该文件中的许多静态题库（如 SwitchChallenge, GridChallenge 等）已被废弃，
++// 实际项目目前使用的是 src/utils/questionGenerators.ts 中的动态算法生成器。
++// 这些静态题库仅被保留作为回退(fallback)以及部分纯文本题型(如 aon_verbal)的数据源。
++// ============================================================================
++
+ export const allQuestions = [
+   ...switchChallengeQuestions,
+   ...gridChallengeQuestions,
+diff --git a/src/main.tsx b/src/main.tsx
+index fab1219..59bef50 100644
+--- a/src/main.tsx
++++ b/src/main.tsx
+@@ -2,6 +2,16 @@ import { StrictMode } from 'react'
+ import { createRoot } from 'react-dom/client'
+ import App from './App'
+ import './index.css'
++import { registerSW } from 'virtual:pwa-register'
++
++const updateSW = registerSW({
++  onNeedRefresh() {
++    // console.log('New content available, please refresh.');
++  },
++  onOfflineReady() {
++    // console.log('App ready to work offline');
++  },
++})
+ 
+ createRoot(document.getElementById('root')!).render(
+   <StrictMode>
+diff --git a/src/pages/Home.tsx b/src/pages/Home.tsx
+index 73716a3..84f6e09 100644
+--- a/src/pages/Home.tsx
++++ b/src/pages/Home.tsx
+@@ -27,8 +27,8 @@ const Home: React.FC = () => {
+     },
+     {
+       id: 'aon_gap_challenge',
+-      title: 'Grid Challenge',
+-      description: '4×4网格形状填充测试',
++      title: 'Gap Challenge',
++      description: language === 'zh' ? '4×4网格形状填充测试(数独逻辑)' : '4x4 Grid Shape Filling Test (Sudoku Logic)',
+       icon: <Brain className="w-8 h-8" />,
+       color: 'from-green-500 to-green-700',
+     },
+@@ -89,10 +89,12 @@ const Home: React.FC = () => {
+       <div className="container mx-auto px-4 py-20">
+         <div className="max-w-4xl mx-auto text-center">
+           <h1 className="text-4xl md:text-6xl font-bold mb-6">
+-            怡安Aon测试模考系统
++            {language === 'zh' ? '怡安Aon测试模考系统' : 'Aon Assessment Simulation System'}
+           </h1>
+           <p className="text-xl md:text-2xl mb-10 text-primary-100">
+-            熟悉测评题型，提升应试能力，为职场竞争做好准备
++            {language === 'zh' 
++              ? '熟悉测评题型，提升应试能力，为职场竞争做好准备' 
++              : 'Familiarize yourself with assessment formats and enhance your career competitiveness'}
+           </p>
+           
+           {/* Language and Exam Mode Toggles */}
+diff --git a/src/pages/Quiz.tsx b/src/pages/Quiz.tsx
+index 2cce09f..2ef2d9d 100644
+--- a/src/pages/Quiz.tsx
++++ b/src/pages/Quiz.tsx
+@@ -38,13 +38,16 @@ const Quiz: React.FC = () => {
+   const { language } = useLanguageStore();
+ 
+   const [selectedAnswer, setSelectedAnswer] = useState('');
++  const [hasStarted, setHasStarted] = useState(false);
+ 
+   // 当类型变化时，自动开始测试
+   useEffect(() => {
+-    if (type && questions.length === 0) {
++    // 只有在未开始且题目为空时才触发，避免因刷新页面触发重复生成
++    if (type && questions.length === 0 && !hasStarted) {
++      setHasStarted(true);
+       startQuiz(type as QuizType, false, type === 'random' || type === 'aon_inductive_grid_fill');
+     }
+-  }, [type, questions.length, startQuiz]);
++  }, [type, questions.length, startQuiz, hasStarted]);
+ 
+   // 处理计时器
+   useEffect(() => {
+@@ -68,23 +71,23 @@ const Quiz: React.FC = () => {
+     }
+   }, [currentQuestionIndex, questions, userAnswers]);
+ 
+-  // 处理答案选择
+-  const handleAnswerSelect = (answer: string) => {
++  // 处理答案选择 (使用 useCallback 避免向下传递的函数在每次 tick 重建)
++  const handleAnswerSelect = React.useCallback((answer: string) => {
+     setSelectedAnswer(answer);
+     selectAnswer(answer);
+-  };
++  }, [selectAnswer]);
+ 
+   // 处理提交
+-  const handleSubmit = () => {
++  const handleSubmit = React.useCallback(() => {
+     submitQuiz();
+     navigate('/result');
+-  };
++  }, [submitQuiz, navigate]);
+ 
+   // 处理返回首页
+-  const handleBackToHome = () => {
++  const handleBackToHome = React.useCallback(() => {
+     resetQuiz();
+     navigate('/');
+-  };
++  }, [resetQuiz, navigate]);
+ 
+   // 格式化时间
+   const formatTime = (seconds: number) => {
+@@ -234,17 +237,21 @@ const Quiz: React.FC = () => {
+                   selectedAnswer={selectedAnswer}
+                   correctAnswer={currentQuestion.correctAnswer}
+                   onSelect={handleAnswerSelect}
++                  intermediateShapes={currentQuestion.switchChallengeData.intermediateShapes}
++                  firstCodeOptions={currentQuestion.switchChallengeData.firstCodeOptions}
++                  secondCodeOptions={currentQuestion.switchChallengeData.secondCodeOptions}
++                  isMultiStep={currentQuestion.switchChallengeData.isMultiStep}
+                 />
+               )}
+               
+-              {/* GridChallenge 图形化题目 */}
++              {/* Gap Challenge (网格填充/符号数独) */}
+               {currentQuestion.gridChallengeData && (
+                 <GridChallenge
+                   grid={currentQuestion.gridChallengeData.grid}
+                   missingPosition={currentQuestion.gridChallengeData.missingPosition}
+                   options={currentQuestion.options}
+                   selectedAnswer={selectedAnswer}
+-                  correctAnswer={currentQuestion.correctAnswer}
++                  correctAnswer={isExamMode ? undefined : currentQuestion.correctAnswer}
+                   onSelect={handleAnswerSelect}
+                 />
+               )}
+@@ -305,10 +312,10 @@ const Quiz: React.FC = () => {
+               )}
+             </Suspense>
+             
+-            {/* 普通题目 */}
++            {/* 普通题目 (包括 AP Reasoning) */}
+             {!currentQuestion.switchChallengeData && !currentQuestion.gridChallengeData && !currentQuestion.scalesIxData && !currentQuestion.digitChallengeData && !currentQuestion.gridInductiveData && !currentQuestion.gridFillData && currentQuestion.type !== 'aon_numerical' && (
+               <>
+-                <h2 className="text-2xl font-bold mb-6">{currentQuestion.content}</h2>
++                <h2 className="text-xl md:text-2xl font-bold mb-6 leading-relaxed whitespace-pre-wrap">{currentQuestion.content}</h2>
+                 
+                 {/* 选项 */}
+                 <div className="space-y-3">
+diff --git a/src/store/quizStore.ts b/src/store/quizStore.ts
+index fd85398..74a667a 100644
+--- a/src/store/quizStore.ts
++++ b/src/store/quizStore.ts
+@@ -2,6 +2,7 @@ import { create } from 'zustand';
+ import { persist } from 'zustand/middleware';
+ import { Question, UserAnswer, QuizResult, QuizType } from '@/types';
+ import { getQuestionsByType } from '@/data/questions';
++import { generateSwitchChallenge, generateScalesIx, generateGapChallenge, generateGridInductive, generateNumericalReasoning, generateApReasoning, generateDigitChallenge } from '@/utils/questionGenerators';
+ import {
+   AdaptiveTestState,
+   initializeAdaptiveTest,
+@@ -23,6 +24,7 @@ interface QuizState {
+   allQuestions: Question[];
+   
+   // 计时器相关
++  timeLimit: number;
+   timeRemaining: number;
+   isTimerRunning: boolean;
+   isExamMode: boolean;
+@@ -56,6 +58,7 @@ export const useQuizStore = create<QuizState>()(
+       isAdaptiveMode: false,
+       adaptiveState: initializeAdaptiveTest(),
+       allQuestions: [],
++      timeLimit: 600,
+       timeRemaining: 600, // 10分钟
+       isTimerRunning: false,
+       isExamMode: false,
+@@ -65,7 +68,39 @@ export const useQuizStore = create<QuizState>()(
+       // 开始测试
+       startQuiz: (type: QuizType, examMode = false, adaptiveMode = false) => {
+         try {
+-          const allQuestions = getQuestionsByType(type);
++          let allQuestions: Question[] = [];
++          
++          // 如果是支持动态生成的题型，则生成题库 (这里设置默认生成100题，模拟无限题库)
++          if (type === 'aon_deductive_switch') {
++            allQuestions = generateSwitchChallenge(100);
++          } else if (type === 'aon_inductive_scales') {
++            allQuestions = generateScalesIx(100);
++          } else if (type === 'aon_gap_challenge') {
++            allQuestions = generateGapChallenge(100);
++          } else if (type === 'aon_inductive_grid') {
++            allQuestions = generateGridInductive(100);
++          } else if (type === 'aon_numerical') {
++            allQuestions = generateNumericalReasoning(100);
++          } else if (type === 'aon_ap_reasoning') {
++            allQuestions = generateApReasoning(100);
++          } else if (type === 'aon_digit_challenge') {
++            allQuestions = generateDigitChallenge(100);
++          } else if (type === 'random') {
++            // 在快速开始/随机模式下，使用所有动态生成的题库
++            const dynamicQuestions = [
++              ...generateSwitchChallenge(15),
++              ...generateScalesIx(15),
++              ...generateGapChallenge(15),
++              ...generateGridInductive(15),
++              ...generateNumericalReasoning(15),
++              ...generateApReasoning(15),
++              ...generateDigitChallenge(15)
++            ];
++            // 打乱题库
++            allQuestions = dynamicQuestions.sort(() => 0.5 - Math.random());
++          } else {
++            allQuestions = getQuestionsByType(type);
++          }
+           
+           if (allQuestions.length === 0) {
+             console.warn(`No questions found for quiz type: ${type}`);
+@@ -87,28 +122,30 @@ export const useQuizStore = create<QuizState>()(
+           switch (type) {
+             case 'aon_verbal':
+             case 'aon_numerical':
+-              timeLimit = 360; // 6分钟
++              timeLimit = 720; // 真实测试：12分钟 (37/49题)
+               break;
+             case 'aon_inductive':
+-              timeLimit = 300; // 5分钟
++            case 'aon_inductive_grid':
++            case 'aon_inductive_grid_fill':
++              timeLimit = 720; // cls 通常是12分钟
+               break;
+             case 'aon_deductive_switch':
+-              timeLimit = 300; // 5分钟
++              timeLimit = 360; // lst 真实测试：6分钟 (15题或无限自适应)
+               break;
+             case 'aon_inductive_scales':
+-              timeLimit = 240; // 4分钟
++              timeLimit = 300; // ix 真实测试：5分钟 (20题)
++              break;
++            case 'aon_gap_challenge':
++              timeLimit = 300; // sx 真实测试：5分钟
+               break;
+             case 'aon_ap_reasoning':
+               timeLimit = 480; // 8分钟
+               break;
+-            case 'aon_gap_challenge':
+-              timeLimit = 300; // 5分钟
+-              break;
+             case 'aon_digit_challenge':
+-              timeLimit = 300; // 5分钟
++              timeLimit = 300; // eql 真实测试：5分钟 (15题或无限自适应)
+               break;
+             case 'aon_applied_numeracy':
+-              timeLimit = 360; // 6分钟
++              timeLimit = 960; // tmt 真实测试：16分钟 (20题)
+               break;
+             case 'cognitive':
+             case 'numerical':
+@@ -127,6 +164,7 @@ export const useQuizStore = create<QuizState>()(
+             isAdaptiveMode: adaptiveMode,
+             adaptiveState: initialAdaptiveState,
+             allQuestions,
++            timeLimit: timeLimit,
+             timeRemaining: timeLimit,
+             isTimerRunning: true,
+             isExamMode: examMode,
+@@ -144,7 +182,6 @@ export const useQuizStore = create<QuizState>()(
+           const { questions, currentQuestionIndex, userAnswers } = get();
+           
+           if (questions.length === 0 || currentQuestionIndex < 0 || currentQuestionIndex >= questions.length) {
+-            console.warn('Invalid question index or empty questions array');
+             return;
+           }
+           
+@@ -161,19 +198,45 @@ export const useQuizStore = create<QuizState>()(
+           );
+           
+           const newUserAnswers = [...userAnswers];
++          // 特殊题型的答案验证逻辑 (如 Digit Challenge 有多个合法解)
++          let isCorrect = false;
++          if (currentQuestion.type === 'aon_digit_challenge' && currentQuestion.digitChallengeData) {
++            const { equation, placeholderCount } = currentQuestion.digitChallengeData;
++            const digits = answer.split('');
++            if (digits.length === placeholderCount) {
++              let evalStr = equation;
++              digits.forEach(d => {
++                evalStr = evalStr.replace('?', d);
++              });
++              const safeExpression = evalStr.replace(/=/g, '===')
++                                            .replace(/×/g, '*')
++                                            .replace(/÷/g, '/');
++              try {
++                if (/^[0-9+\-*/()\s=]+$/.test(safeExpression)) {
++                  isCorrect = Function(`'use strict'; return (${safeExpression})`)();
++                }
++              } catch (e) {
++                isCorrect = false;
++              }
++            }
++          } else {
++            // 普通题型直接对比字符串
++            isCorrect = answer === currentQuestion.correctAnswer;
++          }
++
+           if (existingAnswerIndex >= 0) {
+             // 更新已有答案
+             newUserAnswers[existingAnswerIndex] = {
+               questionId: currentQuestion.id,
+               selectedAnswer: answer,
+-              isCorrect: answer === currentQuestion.correctAnswer,
++              isCorrect,
+             };
+           } else {
+             // 添加新答案
+             newUserAnswers.push({
+               questionId: currentQuestion.id,
+               selectedAnswer: answer,
+-              isCorrect: answer === currentQuestion.correctAnswer,
++              isCorrect,
+             });
+           }
+           
+@@ -194,6 +257,12 @@ export const useQuizStore = create<QuizState>()(
+           }
+           
+           if (isAdaptiveMode) {
++            // 如果用户点击了“上一题”返回历史题目，再点击“下一题”时，直接递增索引，不要生成新题
++            if (currentQuestionIndex < questions.length - 1) {
++              set({ currentQuestionIndex: currentQuestionIndex + 1 });
++              return;
++            }
++
+             if (currentQuestionIndex < 0 || currentQuestionIndex >= questions.length) {
+               console.warn('Invalid question index');
+               return;
+@@ -264,7 +333,7 @@ export const useQuizStore = create<QuizState>()(
+       // 提交测试
+       submitQuiz: () => {
+         try {
+-          const { questions, userAnswers, quizType, timeRemaining } = get();
++          const { questions, userAnswers, quizType, timeLimit, timeRemaining } = get();
+           
+           if (questions.length === 0) {
+             console.warn('No questions to submit');
+@@ -280,7 +349,7 @@ export const useQuizStore = create<QuizState>()(
+             quizType,
+             totalQuestions: questions.length,
+             correctAnswers,
+-            timeSpent: Math.max(0, 600 - timeRemaining), // 确保时间不为负数
++            timeSpent: Math.max(0, timeLimit - timeRemaining), // 确保时间不为负数，且用正确的动态 timeLimit 计算
+             userAnswers,
+             completedAt: Date.now(),
+           };
+@@ -301,6 +370,7 @@ export const useQuizStore = create<QuizState>()(
+           questions: [],
+           currentQuestionIndex: 0,
+           userAnswers: [],
++          timeLimit: 600,
+           timeRemaining: 600,
+           isTimerRunning: false,
+           currentResult: null,
+@@ -318,13 +388,13 @@ export const useQuizStore = create<QuizState>()(
+       
+       // 重做错题目
+       retakeWrongQuestions: () => {
+-        const { userAnswers, quizType } = get();
++        const { userAnswers, quizType, allQuestions, timeLimit } = get();
+         const wrongQuestionIds = userAnswers
+           .filter((ua) => !ua.isCorrect)
+           .map((ua) => ua.questionId);
+         
+         if (wrongQuestionIds.length > 0) {
+-          const allQuestions = getQuestionsByType(quizType);
++          // 直接从 allQuestions 状态中过滤错题，这样能兼容动态生成的题库
+           const wrongQuestions = allQuestions.filter((q) => 
+             wrongQuestionIds.includes(q.id)
+           );
+@@ -333,7 +403,7 @@ export const useQuizStore = create<QuizState>()(
+             questions: wrongQuestions,
+             currentQuestionIndex: 0,
+             userAnswers: [],
+-            timeRemaining: 300, // 5分钟
++            timeRemaining: timeLimit, // 使用当前测试类型的原定总时间
+             isTimerRunning: true,
+             currentResult: null,
+           });
+@@ -370,9 +440,36 @@ export const useQuizStore = create<QuizState>()(
+     }),
+     {
+       name: 'aon-quiz-storage',
+-      partialize: (state) => ({
+-        results: state.results,
+-      }),
++      // 取消仅持久化 results 的限制，改为持久化全部进度。
++      // 但对于包含了 Set 对象的 adaptiveState.usedQuestionIds，需要特殊序列化处理
++      storage: {
++        getItem: (name) => {
++          const str = localStorage.getItem(name);
++          if (!str) return null;
++          try {
++            const parsed = JSON.parse(str);
++            // 恢复 Set 对象
++            if (parsed.state?.adaptiveState?.usedQuestionIds) {
++              parsed.state.adaptiveState.usedQuestionIds = new Set(parsed.state.adaptiveState.usedQuestionIds);
++            }
++            return parsed;
++          } catch (e) {
++            return null;
++          }
++        },
++        setItem: (name, value) => {
++          // 转换 Set 为 Array 以便序列化
++          const stateToSave = { ...value };
++          if (stateToSave.state?.adaptiveState?.usedQuestionIds instanceof Set) {
++            const tempState = JSON.parse(JSON.stringify(stateToSave)); // 深拷贝
++            tempState.state.adaptiveState.usedQuestionIds = Array.from(stateToSave.state.adaptiveState.usedQuestionIds);
++            localStorage.setItem(name, JSON.stringify(tempState));
++            return;
++          }
++          localStorage.setItem(name, JSON.stringify(stateToSave));
++        },
++        removeItem: (name) => localStorage.removeItem(name),
++      },
+     }
+   )
+ );
+diff --git a/src/types/index.ts b/src/types/index.ts
+index cd997cf..2c09e54 100644
+--- a/src/types/index.ts
++++ b/src/types/index.ts
+@@ -23,7 +23,8 @@ export interface ScalesIxData {
+ 
+ export interface DigitChallengeData {
+   equation: string;
+-  targetNumber: number;
++  placeholderCount?: number;
++  targetNumber?: number;
+ }
+ 
+ export interface GridInductiveData {
+@@ -72,6 +73,6 @@ export interface QuizResult {
+   completedAt: number;
+ }
+ 
+-export type QuizType = 'cognitive' | 'numerical' | 'verbal' | 'random' | 'aon_verbal' | 'aon_numerical' | 'aon_inductive' | 'aon_deductive_switch' | 'aon_inductive_scales' | 'aon_ap_reasoning' | 'aon_gap_challenge' | 'aon_digit_challenge' | 'aon_applied_numeracy' | 'aon_inductive_grid_fill';
++export type QuizType = 'cognitive' | 'numerical' | 'verbal' | 'random' | 'aon_verbal' | 'aon_numerical' | 'aon_inductive' | 'aon_inductive_grid' | 'aon_deductive_switch' | 'aon_inductive_scales' | 'aon_ap_reasoning' | 'aon_gap_challenge' | 'aon_digit_challenge' | 'aon_applied_numeracy' | 'aon_inductive_grid_fill';
+ 
+ export type AonAnswer = 'TRUE' | 'FALSE' | 'CANNOT SAY';
+diff --git a/src/utils/adaptiveTest.ts b/src/utils/adaptiveTest.ts
+index 18e1197..dab9912 100644
+--- a/src/utils/adaptiveTest.ts
++++ b/src/utils/adaptiveTest.ts
+@@ -93,11 +93,14 @@ export const updateAdaptiveState = (
+   const newUsedQuestionIds = new Set(adaptiveState.usedQuestionIds);
+   newUsedQuestionIds.add(question.id);
+ 
++  // 使用更科学的自适应步长，随着题目数量增加，难度调整幅度减小（模拟 IRT 信息增量衰减）
++  const stepSize = Math.max(0.1, DIFFICULTY_ADJUSTMENT * (1 - (newQuestionHistory.length / 30)));
++  
+   let newDifficulty = adaptiveState.currentDifficulty;
+   if (isCorrect) {
+-    newDifficulty = Math.min(newDifficulty + DIFFICULTY_ADJUSTMENT, MAX_DIFFICULTY);
++    newDifficulty = Math.min(newDifficulty + stepSize, MAX_DIFFICULTY);
+   } else {
+-    newDifficulty = Math.max(newDifficulty - DIFFICULTY_ADJUSTMENT, MIN_DIFFICULTY);
++    newDifficulty = Math.max(newDifficulty - stepSize, MIN_DIFFICULTY);
+   }
+ 
+   const recentAnswers = newQuestionHistory.slice(-5);
+@@ -124,10 +127,18 @@ export const shouldCompleteTest = (adaptiveState: AdaptiveTestState): boolean =>
+     return true;
+   }
+ 
+-  const recentAnswers = questionHistory.slice(-5);
+-  if (recentAnswers.length === 5) {
+-    const correctCount = recentAnswers.filter((a) => a.isCorrect).length;
+-    if (correctCount === 0 || correctCount === 5) {
++  // 移除粗暴的“连续答对或答错5题就交卷”的判定。
++  // 在真实的 Aon 测试中，时间耗尽才是终止的主要条件。
++  // 这里的自适应逻辑仅用于“提前达到能力收敛”的判断。
++  // 我们使用方差来判断难度是否收敛：如果最近8题的难度方差极小，说明已经测出了真实水平。
++  if (questionHistory.length >= 8) {
++    const recentAnswers = questionHistory.slice(-8);
++    const difficulties = recentAnswers.map(a => a.difficulty);
++    const mean = difficulties.reduce((sum, d) => sum + d, 0) / difficulties.length;
++    const variance = difficulties.reduce((sum, d) => sum + Math.pow(d - mean, 2), 0) / difficulties.length;
++    
++    // 如果难度波动小于 0.05，说明已经收敛
++    if (variance < 0.05) {
+       return true;
+     }
+   }
+diff --git a/src/utils/questionGenerators.ts b/src/utils/questionGenerators.ts
+new file mode 100644
+index 0000000..e04b2ab
+--- /dev/null
++++ b/src/utils/questionGenerators.ts
+@@ -0,0 +1,819 @@
++import { Question, ShapeType } from '@/types';
++
++// 获取随机整数 [min, max]
++const getRandomInt = (min: number, max: number) => {
++  return Math.floor(Math.random() * (max - min + 1)) + min;
++};
++
++// 打乱数组
++const shuffleArray = <T>(array: T[]): T[] => {
++  const newArray = [...array];
++  for (let i = newArray.length - 1; i > 0; i--) {
++    const j = Math.floor(Math.random() * (i + 1));
++    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
++  }
++  return newArray;
++};
++
++const ALL_SHAPES: ShapeType[] = ['triangle', 'circle', 'star', 'cross', 'diamond', 'hexagon', 'square', 'x'];
++
++/**
++ * 根据操作符应用变换
++ * @param input 输入数组
++ * @param operator 形如 "3142" 的字符串
++ * @returns 变换后的数组
++ */
++const applyOperator = (input: ShapeType[], operator: string): ShapeType[] => {
++  const output: ShapeType[] = [];
++  for (let i = 0; i < operator.length; i++) {
++    const index = parseInt(operator[i], 10) - 1;
++    output.push(input[index]);
++  }
++  return output;
++};
++
++/**
++ * 生成随机的 Switch Challenge 操作符
++ * @param length 长度，默认4
++ */
++const generateRandomOperator = (length: number = 4): string => {
++  const indices = Array.from({ length }, (_, i) => i + 1);
++  return shuffleArray(indices).join('');
++};
++
++/**
++ * 生成一组混淆操作符
++ */
++const generateDistractors = (correctAnswer: string, count: number = 2): string[] => {
++  const distractors = new Set<string>();
++  const length = correctAnswer.length;
++  
++  while (distractors.size < count) {
++    const randomOp = generateRandomOperator(length);
++    if (randomOp !== correctAnswer) {
++      distractors.add(randomOp);
++    }
++  }
++  
++  return Array.from(distractors);
++};
++
++/**
++ * 生成 Aon Scales ix (归纳推理) 题目
++ */
++export const generateScalesIx = (count: number = 20): Question[] => {
++  const questions: Question[] = [];
++
++  for (let i = 0; i < count; i++) {
++    const difficulty = getRandomInt(1, 5);
++    
++    // 随机选出用于构造序列的形状
++    const availableShapes = shuffleArray(ALL_SHAPES);
++    const A = availableShapes[0];
++    const B = availableShapes[1];
++    const C = availableShapes[2];
++    
++    let sequence: ShapeType[] = [];
++    let patternName = '';
++    let patternDescription = '';
++    
++    // 根据难度选择模式
++    if (difficulty <= 2) {
++      // A B A B A B A B A
++      for (let j = 0; j < 9; j++) sequence.push(j % 2 === 0 ? A : B);
++      patternName = '交替 (A B A B)';
++      patternDescription = `在这个序列中，图形应该是 ${A} 和 ${B} 交替出现，也就是第1个是 ${A}，第2个是 ${B}，第3个是 ${A}，以此类推。`;
++    } else if (difficulty <= 4) {
++      // A A B B A A B B A
++      for (let j = 0; j < 9; j++) sequence.push(Math.floor(j / 2) % 2 === 0 ? A : B);
++      patternName = '双重复 (A A B B)';
++      patternDescription = `在这个序列中，图形应该是 ${A} 和 ${B} 各连续出现两次再交替，也就是 ${A}, ${A}, 然后 ${B}, ${B}，以此类推。`;
++    } else {
++      // A B C A B C A B C
++      for (let j = 0; j < 9; j++) sequence.push([A, B, C][j % 3]);
++      patternName = '三循环 (A B C A B C)';
++      patternDescription = `在这个序列中，图形应该是以 ${A}, ${B}, ${C} 为一组，三个图形作为一个单元不断循环重复出现。`;
++    }
++
++    // 随机挑选一个位置打破规则 (不能是第一个，否则太容易被当成另一种规则)
++    const errorIndex = getRandomInt(2, 8);
++    const correctShape = sequence[errorIndex];
++    let wrongShape = availableShapes[getRandomInt(3, 7)];
++    // 确保 wrongShape 不是原本应该出现的形状
++    if (wrongShape === correctShape) wrongShape = availableShapes[8] || availableShapes[4];
++    
++    sequence[errorIndex] = wrongShape;
++    
++    // 生成保姆级解析
++    const explanation = `【解析】\n通过观察其他正确的图形，我们可以推断出正确的模式是：${patternName}。\n${patternDescription}\n\n如果你顺着这个规律往下数：\n- 第 ${errorIndex + 1} 个位置本该轮到 ${correctShape}\n- 但是它实际显示成了 ${wrongShape}\n\n因此，第 ${errorIndex + 1} 个图形破坏了规律，就是我们要找的“Odd One Out”。`;
++
++    questions.push({
++      id: `gen-scales-${Date.now()}-${i}`,
++      type: 'aon_inductive_scales',
++      content: '观察下面的图形序列，找出不符合规律的那一个',
++      options: Array.from({ length: 9 }, (_, k) => k.toString()), // 0-8
++      correctAnswer: errorIndex.toString(),
++      explanation: explanation,
++      difficulty,
++      isAonStyle: true,
++      scalesIxData: {
++        allShapes: sequence,
++        oddOneOut: wrongShape,
++        oddOneOutIndex: errorIndex,
++      }
++    });
++  }
++
++  return questions;
++};
++
++/**
++ * 生成 Aon Digit Challenge (数字推理/填空) 题目
++ */
++export const generateDigitChallenge = (count: number = 20): Question[] => {
++  const questions: Question[] = [];
++
++  for (let i = 0; i < count; i++) {
++    const difficulty = getRandomInt(1, 5);
++    
++    // 根据难度决定操作符和数字范围
++    let operators = ['+', '-'];
++    if (difficulty > 2) operators.push('*');
++    // if (difficulty > 4) operators.push('/'); // 除法容易产生小数，在此场景中较难控制整数解，暂且用乘法增加难度
++    
++    const op = operators[getRandomInt(0, operators.length - 1)];
++    
++    let a, b, target;
++    let equation = '';
++    let placeholderCount = 2;
++    let explanation = '';
++    let correctAnswer = '';
++    
++    // 生成一个合法的等式
++    if (op === '+') {
++      a = getRandomInt(1, 9);
++      b = getRandomInt(1, 9);
++      target = a + b;
++      equation = `? + ? = ${target}`;
++      explanation = `我们需要找到两个数字，它们的和为 ${target}。一个合法的解是 ${a} 和 ${b}。`;
++      correctAnswer = `${a}${b}`;
++    } else if (op === '-') {
++      a = getRandomInt(2, 9);
++      b = getRandomInt(1, a - 1);
++      target = a - b;
++      equation = `? - ? = ${target}`;
++      explanation = `我们需要找到两个数字，它们的差为 ${target}。一个合法的解是 ${a} 和 ${b}。`;
++      correctAnswer = `${a}${b}`;
++    } else if (op === '*') {
++      a = getRandomInt(2, 9);
++      b = getRandomInt(2, 9);
++      target = a * b;
++      equation = `? × ? = ${target}`;
++      explanation = `我们需要找到两个数字，它们的乘积为 ${target}。一个合法的解是 ${a} 和 ${b}。`;
++      correctAnswer = `${a}${b}`;
++    }
++
++    // 偶尔生成带有3个问号的高难度题 (比如 ? + ? - ? = X)
++    if (difficulty >= 4 && Math.random() > 0.5) {
++      placeholderCount = 3;
++      a = getRandomInt(1, 9);
++      b = getRandomInt(1, 9);
++      let c = getRandomInt(1, a + b - 1); // 保证结果为正数
++      target = a + b - c;
++      equation = `? + ? - ? = ${target}`;
++      explanation = `我们需要找到三个数字，满足前两个数字之和减去第三个数字等于 ${target}。一个合法的解是 ${a}, ${b} 和 ${c}。`;
++      correctAnswer = `${a}${b}${c}`;
++    }
++
++    questions.push({
++      id: `gen-digit-${Date.now()}-${i}`,
++      type: 'aon_digit_challenge',
++      content: '将数字填入等式中，使其成立',
++      options: [],
++      correctAnswer: correctAnswer, // 在 Digit Challenge 中，这个字段只是作为“一个合法示例”，实际评分会使用表达式计算器
++      explanation: `【解析】\n${explanation}\n\n注意：这道题可能存在多个不同的合法答案，只要代入后等式成立即算正确。`,
++      difficulty,
++      isAonStyle: true,
++      digitChallengeData: {
++        equation,
++        placeholderCount
++      }
++    });
++  }
++
++  return questions;
++};
++
++/**
++ * 生成拉丁方阵
++ * 保证每行每列元素不重复。支持 4x4 和 5x5。
++ */
++const generateLatinSquare = (elements: ShapeType[], size: 4 | 5): ShapeType[][] => {
++  const grid: ShapeType[][] = Array.from({ length: size }, () => Array(size).fill(null));
++  
++  if (size === 4) {
++    const templates = [
++      [
++        [0, 1, 2, 3],
++        [1, 0, 3, 2],
++        [2, 3, 0, 1],
++        [3, 2, 1, 0]
++      ],
++      [
++        [0, 1, 2, 3],
++        [2, 3, 0, 1],
++        [3, 2, 1, 0],
++        [1, 0, 3, 2]
++      ],
++      [
++        [0, 1, 2, 3],
++        [3, 2, 1, 0],
++        [1, 0, 3, 2],
++        [2, 3, 0, 1]
++      ]
++    ];
++    const template = templates[getRandomInt(0, templates.length - 1)];
++    const mappedElements = shuffleArray(elements);
++    for (let i = 0; i < size; i++) {
++      for (let j = 0; j < size; j++) {
++        grid[i][j] = mappedElements[template[i][j]];
++      }
++    }
++  } else if (size === 5) {
++    // 5x5 拉丁方阵标准模板 (循环移位法)
++    const mappedElements = shuffleArray(elements);
++    for (let i = 0; i < size; i++) {
++      for (let j = 0; j < size; j++) {
++        // 使用 (i + j) % 5 可以生成完美的 5x5 拉丁方阵
++        grid[i][j] = mappedElements[(i + j) % 5];
++      }
++    }
++  }
++  
++  return grid;
++};
++
++/**
++ * 生成 Aon Gap Challenge (网格填充/符号数独) 题目
++ */
++export const generateGapChallenge = (count: number = 20): Question[] => {
++  const questions: Question[] = [];
++
++  for (let i = 0; i < count; i++) {
++    const difficulty = getRandomInt(1, 5);
++    
++    // 根据难度决定是 4x4 还是 5x5 网格
++    const gridSize = difficulty <= 2 ? 4 : 5;
++    
++    // 选出对应的形状种类
++    const selectedShapes = shuffleArray(ALL_SHAPES).slice(0, gridSize);
++    
++    // 生成拉丁方阵
++    const grid = generateLatinSquare(selectedShapes, gridSize);
++    
++    // Gap Challenge 特点是“高度留白”，只给出少量线索
++    // 4x4 需要保留大概 5-6 个线索，5x5 需要保留大概 8-10 个线索
++    const totalCells = gridSize * gridSize;
++    const keepCount = gridSize === 4 ? getRandomInt(5, 6) : getRandomInt(8, 10);
++    const missingCount = totalCells - keepCount; // 要挖去的数量
++    
++    // 随机选出要挖去的位置
++    const positions = [];
++    for (let r = 0; r < gridSize; r++) {
++      for (let c = 0; c < gridSize; c++) {
++        positions.push({ row: r, col: c });
++      }
++    }
++    const missingPositions = shuffleArray(positions).slice(0, missingCount);
++    
++    // 挖去的第一个位置作为目标 `?`
++    const targetPos = missingPositions[0];
++    const correctAnswer = grid[targetPos.row][targetPos.col];
++    
++    // 构建前端显示的网格
++    const displayGrid: (ShapeType | null)[][] = JSON.parse(JSON.stringify(grid));
++    missingPositions.forEach(pos => {
++      displayGrid[pos.row][pos.col] = null;
++    });
++
++    questions.push({
++      id: `gen-grid-${Date.now()}-${i}`,
++      type: 'aon_gap_challenge',
++      content: '找出完成网格的形状。任何行或列中都没有重复的形状。',
++      options: selectedShapes,
++      correctAnswer: correctAnswer,
++      explanation: `通过观察第 ${targetPos.row + 1} 行和第 ${targetPos.col + 1} 列已有的形状，缺失的形状必须是 ${correctAnswer} 以满足每行每列不重复的规则。`,
++      difficulty,
++      isAonStyle: true,
++      gridChallengeData: {
++        grid: displayGrid,
++        missingPosition: targetPos,
++      }
++    });
++  }
++
++  return questions;
++};
++
++/**
++ * 生成 Aon Grid Inductive (3x3网格规则推理) 题目
++ */
++export const generateGridInductive = (count: number = 20): Question[] => {
++  const questions: Question[] = [];
++
++  const ruleTypes = [
++    'center_shape',       // 中心有一个特定形状
++    'corner_shapes',      // 四个角是特定形状
++    'middle_row_same',    // 中间一行都是同一个形状
++    'diagonal_same',      // 主对角线相同
++    'cross_pattern',      // 十字架模式相同
++  ];
++
++  for (let i = 0; i < count; i++) {
++    const difficulty = getRandomInt(1, 5);
++    const ruleType = ruleTypes[getRandomInt(0, ruleTypes.length - 1)];
++    const targetShape = ALL_SHAPES[getRandomInt(0, ALL_SHAPES.length - 1)];
++    const otherShapes = ALL_SHAPES.filter(s => s !== targetShape);
++
++    // 辅助函数：生成一个完全随机的3x3网格
++    const generateRandomGrid = () => {
++      const grid: (ShapeType | null)[][] = Array.from({ length: 3 }, () => Array(3).fill(null));
++      for (let r = 0; r < 3; r++) {
++        for (let c = 0; c < 3; c++) {
++          if (Math.random() > 0.3) {
++            grid[r][c] = ALL_SHAPES[getRandomInt(0, ALL_SHAPES.length - 1)];
++          }
++        }
++      }
++      return grid;
++    };
++
++    // 辅助函数：应用规则到网格
++    const applyRule = (grid: (ShapeType | null)[][]) => {
++      const newGrid = JSON.parse(JSON.stringify(grid));
++      switch (ruleType) {
++        case 'center_shape':
++          newGrid[1][1] = targetShape;
++          break;
++        case 'corner_shapes':
++          newGrid[0][0] = targetShape;
++          newGrid[0][2] = targetShape;
++          newGrid[2][0] = targetShape;
++          newGrid[2][2] = targetShape;
++          break;
++        case 'middle_row_same':
++          newGrid[1][0] = targetShape;
++          newGrid[1][1] = targetShape;
++          newGrid[1][2] = targetShape;
++          break;
++        case 'diagonal_same':
++          newGrid[0][0] = targetShape;
++          newGrid[1][1] = targetShape;
++          newGrid[2][2] = targetShape;
++          break;
++        case 'cross_pattern':
++          newGrid[0][1] = targetShape;
++          newGrid[1][0] = targetShape;
++          newGrid[1][1] = targetShape;
++          newGrid[1][2] = targetShape;
++          newGrid[2][1] = targetShape;
++          break;
++      }
++      return newGrid;
++    };
++
++    // 辅助函数：破坏规则 (确保不符合该规则)
++    const breakRule = (grid: (ShapeType | null)[][]) => {
++      const newGrid = JSON.parse(JSON.stringify(grid));
++      const wrongShape = otherShapes[getRandomInt(0, otherShapes.length - 1)];
++      switch (ruleType) {
++        case 'center_shape':
++          newGrid[1][1] = wrongShape; // 强制不是目标形状
++          break;
++        case 'corner_shapes':
++          newGrid[0][0] = wrongShape; // 至少一个角不是
++          break;
++        case 'middle_row_same':
++          newGrid[1][1] = wrongShape; // 打破中间行
++          break;
++        case 'diagonal_same':
++          newGrid[1][1] = wrongShape; // 打破对角线
++          break;
++        case 'cross_pattern':
++          newGrid[1][1] = wrongShape; // 打破十字架
++          break;
++      }
++      return newGrid;
++    };
++
++    // 生成2个示例网格 (符合规则)
++    const exampleGrids = [
++      applyRule(generateRandomGrid()),
++      applyRule(generateRandomGrid())
++    ];
++
++    // 生成4个候选网格 (2个符合，2个不符合)
++    const correctGrids = [
++      applyRule(generateRandomGrid()),
++      applyRule(generateRandomGrid())
++    ];
++    const wrongGrids = [
++      breakRule(generateRandomGrid()),
++      breakRule(generateRandomGrid())
++    ];
++
++    // 打乱4个候选网格
++    const questionGridsCandidates = [
++      { grid: correctGrids[0], isCorrect: true },
++      { grid: correctGrids[1], isCorrect: true },
++      { grid: wrongGrids[0], isCorrect: false },
++      { grid: wrongGrids[1], isCorrect: false }
++    ];
++    const shuffledCandidates = shuffleArray(questionGridsCandidates);
++
++    const questionGrids = shuffledCandidates.map(c => c.grid);
++    
++    // 找出正确的索引 (1-based)
++    const correctIndices = shuffledCandidates
++      .map((c, idx) => c.isCorrect ? idx + 1 : -1)
++      .filter(idx => idx !== -1)
++      .sort((a, b) => a - b);
++      
++    const correctAnswer = correctIndices.join(',');
++
++    let ruleDescription = '';
++    if (ruleType === 'center_shape') ruleDescription = `中心必须是 ${targetShape}`;
++    if (ruleType === 'corner_shapes') ruleDescription = `四个角必须都是 ${targetShape}`;
++    if (ruleType === 'middle_row_same') ruleDescription = `中间一行必须都是 ${targetShape}`;
++    if (ruleType === 'diagonal_same') ruleDescription = `主对角线必须都是 ${targetShape}`;
++    if (ruleType === 'cross_pattern') ruleDescription = `必须包含 ${targetShape} 组成的十字架`;
++
++    questions.push({
++      id: `gen-grid-inductive-${Date.now()}-${i}`,
++      type: 'aon_inductive_grid',
++      content: '观察左侧网格的规则，选择右侧两个遵循相同规则的网格',
++      options: [],
++      correctAnswer: correctAnswer,
++      explanation: `这两个示例网格的共同规则是：${ruleDescription}。右侧网格中只有第 ${correctIndices[0]} 和第 ${correctIndices[1]} 个符合此规则。`,
++      difficulty,
++      isAonStyle: true,
++      gridInductiveData: {
++        exampleGrids,
++        questionGrids,
++        correctPairs: [correctIndices[0], correctIndices[1]]
++      }
++    });
++  }
++
++  return questions;
++};
++
++/**
++ * 生成 Aon AP Reasoning (逻辑前提与结论推理测试) 题目
++ */
++export const generateApReasoning = (count: number = 20): Question[] => {
++  const questions: Question[] = [];
++
++  // AP Reasoning 属于高度结构化的逻辑题，分为不同类型的逻辑模板
++  // 1. 集合重叠问题 (Some A are B -> Some B are A)
++  // 2. 排序问题 (A > B, B > C -> A > C)
++  // 3. 排班问题 (A before B, C after D)
++  // 4. 充分必要条件 (If A then B, A is true -> B is true)
++  // 5. 互斥集合 (All A are B, No C are B -> Some A are not C)
++
++  const names = ['Jordan', 'Alex', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Sam', 'Jamie', 'Charlie', 'Avery'];
++  const companies = ['Tee-Tech', 'BrightPath', 'Alpha Corp', 'Beta Inc', 'Gamma LLC', 'Delta Group'];
++  
++  for (let i = 0; i < count; i++) {
++    const difficulty = getRandomInt(1, 5);
++    const templateType = getRandomInt(1, 5);
++    
++    let content = '';
++    let options: string[] = [];
++    let correctAnswer = '';
++    let explanation = '';
++    let questionText = '根据以上信息，下列哪项陈述必然正确？';
++
++    if (templateType === 1) {
++      // 集合重叠问题 (Some A are B -> Some B are A)
++      const groups1 = ['上白班的员工', '在研发部的员工', '有五年以上经验的员工', '负责北美市场的销售'];
++      const groups2 = ['上双班', '负责测试工作', '会说法语', '有MBA学位'];
++      const g1 = groups1[getRandomInt(0, groups1.length - 1)];
++      const g2 = groups2[getRandomInt(0, groups2.length - 1)];
++      
++      content = `一些${g1}也${g2}。`;
++      options = [
++        `所有${g1}都${g2}。`,
++        `一些${g1}不${g2}。`,
++        `没有${g1}${g2}。`,
++        `一些${g2}的员工不${g1}。`,
++        `一些${g2}的员工也${g1}。`
++      ];
++      correctAnswer = `一些${g2}的员工也${g1}。`;
++      explanation = `题目说明“一些${g1}也${g2}”，这意味着这两个群体之间有交集。因此必然有一些${g2}的员工也${g1}。`;
++      
++    } else if (templateType === 2) {
++      // 排序问题
++      const items = shuffleArray(['G', 'H', 'I', 'J', 'K', 'L']);
++      // 设定的真实大小顺序为 items[0] > items[1] > items[2] > items[3] > items[4] > items[5]
++      const [A, B, C, D, E, F] = items;
++      
++      content = `大楼里有六个会议室：${items.sort().join('、')}。\n\n• ${D} 比 ${E} 大。\n• ${B} 比 ${D} 大。\n• 有一个房间比 ${B} 小，但比 ${D} 大。\n• ${A} 比 ${B} 和 ${C} 都大。`;
++      questionText = '根据以上信息，以下哪项是从大到小的可能排序？';
++      
++      const correctOrder = `${A}, ${B}, ${C}, ${D}, ${E}, ${F}`;
++      
++      options = shuffleArray([
++        correctOrder,
++        `${F}, ${E}, ${C}, ${A}, ${B}, ${D}`,
++        `${D}, ${B}, ${F}, ${C}, ${A}, ${E}`,
++        `${B}, ${A}, ${D}, ${C}, ${F}, ${E}`,
++        `${A}, ${F}, ${B}, ${D}, ${C}, ${E}`
++      ]);
++      correctAnswer = correctOrder;
++      explanation = `解析：
++1. 根据“${D} 比 ${E} 大”，得知 ${D} > ${E}。
++2. 根据“${B} 比 ${D} 大”，得知 ${B} > ${D}。
++3. 根据“有一个房间比 ${B} 小，但比 ${D} 大”，说明 ${B} 和 ${D} 之间至少有一个房间，即 ${C} (因为 ${A} 是最大的)。
++4. 根据“${A} 比 ${B} 和 ${C} 都大”，得知 ${A} > ${B} 且 ${A} > ${C}。
++结合以上线索，唯一完全符合所有规则的顺序是：${correctOrder}。`;
++
++    } else if (templateType === 3) {
++      // 排班问题
++      const nurses = shuffleArray(['C', 'D', 'E', 'F', 'G', 'H']);
++      const [n1, n2, n3, n4, n5, n6] = nurses;
++      // 真实顺序: n6, n3, n5, n2, n1, n4
++      
++      content = `诊所有6名护士，他们的用餐时间必须安排好：${nurses.sort().join('、')}。\n\n规则如下：\n• ${n1} 必须在 ${n4} 之前用餐。\n• ${n3} 必须在 ${n2} 之前用餐。\n• ${n2} 必须在 ${n1} 之前用餐。\n• ${n5} 必须在 ${n6} 之后用餐。\n• ${n1} 不能紧挨着 ${n6} 用餐。`;
++      questionText = '根据这些规则，以下哪项是可接受的用餐顺序？';
++      
++      const correctOrder = `${n6},${n3},${n5},${n2},${n1},${n4}`;
++      
++      options = shuffleArray([
++        correctOrder,
++        `${n1},${n3},${n6},${n5},${n2},${n4}`,
++        `${n4},${n3},${n6},${n2},${n5},${n1}`,
++        `${n3},${n2},${n6},${n1},${n4},${n5}`,
++        `${n6},${n3},${n1},${n2},${n4},${n5}`
++      ]);
++      correctAnswer = correctOrder;
++      explanation = `解析：
++规则梳理：
++1. ${n1} < ${n4}
++2. ${n3} < ${n2}
++3. ${n2} < ${n1}
++4. ${n6} < ${n5}
++5. ${n1} 和 ${n6} 不能相邻
++
++结合前三条规则，形成一条清晰的时间链：${n3} < ${n2} < ${n1} < ${n4}。
++再结合第四条规则：${n6} < ${n5}。
++检查选项 ${correctOrder}：
++位置：1.${n6}, 2.${n3}, 3.${n5}, 4.${n2}, 5.${n1}, 6.${n4}
++- ${n1}(第5) 在 ${n4}(第6) 之前 (符合)
++- ${n3}(第2) 在 ${n2}(第4) 之前 (符合)
++- ${n2}(第4) 在 ${n1}(第5) 之前 (符合)
++- ${n5}(第3) 在 ${n6}(第1) 之后 (符合)
++- ${n1}(第5) 和 ${n6}(第1) 不相邻 (符合)
++完美满足所有条件。`;
++
++    } else if (templateType === 4) {
++      // 充分必要条件 (找错误项)
++      const company = companies[getRandomInt(0, companies.length - 1)];
++      const name = names[getRandomInt(0, names.length - 1)];
++      
++      content = `${company} 有一个顾问团队。所有首席顾问都有超过一年的经验。所有运行高管研讨会的顾问都拥有MBA学位。所有处理多个研讨会主题的顾问都是首席顾问。所有提供金融研讨会的顾问都拥有MBA学位。${name}运行高管研讨会并处理多个研讨会主题。`;
++      questionText = '假设这些陈述为真，以下哪项**可能为假**？';
++      
++      options = [
++        `${name}有超过一年的经验。`,
++        `${name}拥有MBA学位。`,
++        `${name}是首席顾问。`,
++        `${name}提供金融研讨会。`,
++        `所有处理多个研讨会主题的顾问都有超过一年的经验。`
++      ];
++      correctAnswer = `${name}提供金融研讨会。`;
++      explanation = `已知 ${name} 处理多个主题，所以他是首席顾问，因此有超过一年经验。他运行高管研讨会，所以他有MBA。但拥有MBA不代表他一定提供金融研讨会，这是充分条件的倒置，所以此项可能为假。`;
++
++    } else {
++      // 互斥集合
++      const company = companies[getRandomInt(0, companies.length - 1)];
++      const major1 = '计算机科学';
++      const major2 = '文学';
++      const role = '分析师';
++      
++      content = `${company} 在招聘 ${role}。他们发现所有前${major1}专业的学生都成为了${role}。他们还发现没有前${major2}专业的学生成为${role}。`;
++      
++      options = [
++        `所有前${major2}专业的学生也是前${major1}专业的学生。`,
++        `所有不是前${major2}专业的学生都是前${major1}专业的学生。`,
++        `一些前${major1}专业的学生不是前${major2}专业的学生。`,
++        `没有不是前${major1}专业的学生不是前${major2}专业的学生。`,
++        `一些前${major2}专业的学生也是前${major1}专业的学生。`
++      ];
++      correctAnswer = `一些前${major1}专业的学生不是前${major2}专业的学生。`;
++      explanation = `由于所有${major1}学生都成了${role}，而没有${major2}学生成为${role}，这两个集合之间不存在交集（至少对于成为分析师的那部分）。因此必然有一些${major1}学生不是${major2}学生。`;
++    }
++
++    questions.push({
++      id: `gen-ap-reasoning-${Date.now()}-${i}`,
++      type: 'aon_ap_reasoning',
++      content: `${content}\n\n${questionText}`,
++      options,
++      correctAnswer,
++      explanation,
++      difficulty,
++      isAonStyle: true
++    });
++  }
++
++  return questions;
++};
++
++/**
++ * 生成 Aon Numerical Reasoning (数字图表推理) 题目
++ */
++export const generateNumericalReasoning = (count: number = 20): Question[] => {
++  const questions: Question[] = [];
++  
++  const categoriesList = [
++    ['销售额', '研发成本', '营销费用', '管理费用', '净利润', '员工薪酬'],
++    ['北美收入', '欧洲收入', '亚洲收入', '南美收入', '非洲收入'],
++    ['智能手机', '笔记本电脑', '平板电脑', '智能手表', '配件'],
++    ['一季度', '二季度', '三季度', '四季度']
++  ];
++  const tabNames = ['公司财务', '地区收入', '产品线销量', '季度业绩', '员工数据', '市场份额'];
++
++  for (let i = 0; i < count; i++) {
++    const difficulty = getRandomInt(1, 5);
++    
++    // 随机生成 4-6 个 Tab 页的数据
++    const numTabs = getRandomInt(4, 6);
++    const selectedTabNames = shuffleArray(tabNames).slice(0, numTabs);
++    
++    // 生成每个 Tab 的表格数据，并拼装成一个特殊的 Markdown 格式
++    // 格式约定：[TAB:Tab名称]\n[TABLE]\n表格内容\n
++    let dataSheet = '';
++    const allTableData: Record<string, { categories: string[], years: string[], data: Record<string, Record<string, number>> }> = {};
++    
++    selectedTabNames.forEach(tabName => {
++      const categories = categoriesList[getRandomInt(0, categoriesList.length - 1)];
++      const years = ['2021', '2022', '2023', '2024'];
++      
++      const numCategories = getRandomInt(3, 5);
++      const selectedCategories = shuffleArray(categories).slice(0, numCategories);
++      const numYears = getRandomInt(2, 4);
++      const selectedYears = years.slice(years.length - numYears);
++      
++      const tableData: Record<string, Record<string, number>> = {};
++      selectedCategories.forEach(cat => {
++        tableData[cat] = {};
++        selectedYears.forEach(year => {
++          tableData[cat][year] = getRandomInt(1000, 9999);
++        });
++      });
++      
++      allTableData[tabName] = { categories: selectedCategories, years: selectedYears, data: tableData };
++      
++      dataSheet += `[TAB:${tabName}]\n[TABLE]\n`;
++      dataSheet += `项目 | ${selectedYears.join(' | ')}\n`;
++      selectedCategories.forEach(cat => {
++        const row = [cat, ...selectedYears.map(y => tableData[cat][y].toString())];
++        dataSheet += `${row.join(' | ')}\n`;
++      });
++      dataSheet += '\n(单位：百万美元)\n\n';
++    });
++
++    // 随机选择一个 Tab 作为出题目标
++    const targetTabName = selectedTabNames[getRandomInt(0, selectedTabNames.length - 1)];
++    const targetTabData = allTableData[targetTabName];
++
++    // 生成问题 (正确 / 错误 / 无法确定)
++    const questionType = getRandomInt(0, 2); // 0: True, 1: False, 2: Cannot Say
++    
++    let content = '';
++    let correctAnswer = '';
++    let explanation = '';
++    
++    const randomCat = targetTabData.categories[getRandomInt(0, targetTabData.categories.length - 1)];
++    const randomYear = targetTabData.years[getRandomInt(0, targetTabData.years.length - 1)];
++    const actualValue = targetTabData.data[randomCat][randomYear];
++    
++    if (questionType === 0) { // True
++      // 模糊描述大于/小于
++      const offset = getRandomInt(10, 100);
++      if (Math.random() > 0.5) {
++        content = `在 ${randomYear} 年，${randomCat} 超过了 ${actualValue - offset} 百万美元。`;
++      } else {
++        content = `在 ${randomYear} 年，${randomCat} 低于 ${actualValue + offset} 百万美元。`;
++      }
++      correctAnswer = '正确';
++      explanation = `在“${targetTabName}”标签页中，表格显示 ${randomYear} 年的 ${randomCat} 为 ${actualValue} 百万美元，这符合题目描述。`;
++    } else if (questionType === 1) { // False
++      const offset = getRandomInt(500, 1000);
++      if (Math.random() > 0.5) {
++        content = `在 ${randomYear} 年，${randomCat} 超过了 ${actualValue + offset} 百万美元。`;
++      } else {
++        content = `在 ${randomYear} 年，${randomCat} 低于 ${actualValue - offset} 百万美元。`;
++      }
++      correctAnswer = '错误';
++      explanation = `在“${targetTabName}”标签页中，表格显示 ${randomYear} 年的 ${randomCat} 为 ${actualValue} 百万美元，这与题目描述矛盾。`;
++    } else { // Cannot Say
++      // 问一个不存在的年份或类别
++      const missingYear = '2025';
++      content = `在 ${missingYear} 年，${randomCat} 超过了 ${actualValue} 百万美元。`;
++      correctAnswer = '无法确定';
++      explanation = `在所有标签页中都没有提供 ${missingYear} 年的数据，因此无法确定该陈述的真伪。`;
++    }
++
++    questions.push({
++      id: `gen-numerical-${Date.now()}-${i}`,
++      type: 'aon_numerical',
++      content,
++      options: ['正确', '错误', '无法确定'],
++      correctAnswer,
++      explanation,
++      difficulty,
++      isAonStyle: true,
++      dataSheet
++    });
++  }
++
++  return questions;
++};
++
++/**
++ * 生成 Aon Switch Challenge (演绎逻辑) 题目
++ */
++export const generateSwitchChallenge = (count: number = 20): Question[] => {
++  const questions: Question[] = [];
++
++  for (let i = 0; i < count; i++) {
++    // 决定难度 (1-5)
++    // 1-2: 单步变换
++    // 3-5: 双步变换
++    const difficulty = getRandomInt(1, 5);
++    const isMultiStep = difficulty >= 3;
++    
++    // 随机选择4个不重复的形状
++    const inputShapes = shuffleArray(ALL_SHAPES).slice(0, 4);
++    
++    if (!isMultiStep) {
++      // 单步变换
++      const operator = generateRandomOperator(4);
++      const outputShapes = applyOperator(inputShapes, operator);
++      
++      const options = shuffleArray([operator, ...generateDistractors(operator, 2)]);
++      
++      questions.push({
++        id: `gen-switch-${Date.now()}-${i}`,
++        type: 'aon_deductive_switch',
++        content: '找出将输入更改为给定输出的正确代码',
++        options,
++        correctAnswer: operator,
++        explanation: `输入形状按索引1,2,3,4排列，应用操作符 ${operator} 后，第1个位置变成了原第${operator[0]}个形状，以此类推。`,
++        difficulty,
++        isAonStyle: true,
++        switchChallengeData: {
++          inputShapes,
++          outputShapes,
++          options
++        }
++      });
++    } else {
++      // 双步变换
++      const firstOperator = generateRandomOperator(4);
++      const secondOperator = generateRandomOperator(4);
++      
++      const intermediateShapes = applyOperator(inputShapes, firstOperator);
++      const outputShapes = applyOperator(intermediateShapes, secondOperator);
++      
++      const firstOptions = shuffleArray([firstOperator, ...generateDistractors(firstOperator, 2)]);
++      const secondOptions = shuffleArray([secondOperator, ...generateDistractors(secondOperator, 2)]);
++      
++      const correctAnswer = `${firstOperator}-${secondOperator}`;
++      const options = [correctAnswer]; // 在多步中，这个options字段只是为了兼容，组件内部不直接渲染这个大数组
++      
++      questions.push({
++        id: `gen-switch-multi-${Date.now()}-${i}`,
++        type: 'aon_deductive_switch',
++        content: '找到两个正确的代码 - 第一个代码改变输入，第二个代码将结果改变为输出',
++        options,
++        correctAnswer,
++        explanation: `第一步应用操作符 ${firstOperator} 得到中间结果，第二步应用操作符 ${secondOperator} 得到最终输出。`,
++        difficulty,
++        isAonStyle: true,
++        switchChallengeData: {
++          inputShapes,
++          outputShapes,
++          options,
++          intermediateShapes,
++          firstCodeOptions: firstOptions,
++          secondCodeOptions: secondOptions,
++          isMultiStep: true
++        }
++      });
++    }
++  }
++
++  return questions;
++};
+diff --git a/src/vite-env.d.ts b/src/vite-env.d.ts
+index 11f02fe..64251fb 100644
+--- a/src/vite-env.d.ts
++++ b/src/vite-env.d.ts
+@@ -1 +1,2 @@
+ /// <reference types="vite/client" />
++/// <reference types="vite-plugin-pwa/client" />
+diff --git a/tsconfig.json b/tsconfig.json
+index d75047a..a98f8e7 100644
+--- a/tsconfig.json
++++ b/tsconfig.json
+@@ -1,5 +1,6 @@
+ {
+   "compilerOptions": {
++    "ignoreDeprecations": "5.0",
+     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+     "target": "ES2020",
+     "useDefineForClassFields": true,
+diff --git a/vite.config.ts b/vite.config.ts
+index ae87a08..22ff10a 100644
+--- a/vite.config.ts
++++ b/vite.config.ts
+@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
+ import react from '@vitejs/plugin-react'
+ import tsconfigPaths from "vite-tsconfig-paths";
+ import { traeBadgePlugin } from 'vite-plugin-trae-solo-badge';
++import { VitePWA } from 'vite-plugin-pwa';
+ 
+ // https://vite.dev/config/
+ export default defineConfig({
+@@ -16,6 +17,29 @@ export default defineConfig({
+         ],
+       },
+     }),
++    VitePWA({
++      registerType: 'autoUpdate',
++      manifest: {
++        name: '怡安Aon测试模考系统',
++        short_name: 'Aon Test',
++        description: '怡安Aon测试模考系统，熟悉测评题型，提升应试能力。',
++        theme_color: '#0f172a',
++        background_color: '#0f172a',
++        display: 'standalone',
++        icons: [
++          {
++            src: '/icon-192x192.png',
++            sizes: '192x192',
++            type: 'image/png'
++          },
++          {
++            src: '/icon-512x512.png',
++            sizes: '512x512',
++            type: 'image/png'
++          }
++        ]
++      }
++    }),
+     traeBadgePlugin({
+       variant: 'dark',
+       position: 'bottom-right',

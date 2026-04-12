@@ -27,8 +27,8 @@ const Home: React.FC = () => {
     },
     {
       id: 'aon_gap_challenge',
-      title: 'Grid Challenge',
-      description: '4×4网格形状填充测试',
+      title: 'Gap Challenge',
+      description: language === 'zh' ? '4×4网格形状填充测试(数独逻辑)' : '4x4 Grid Shape Filling Test (Sudoku Logic)',
       icon: <Brain className="w-8 h-8" />,
       color: 'from-green-500 to-green-700',
     },
@@ -89,10 +89,12 @@ const Home: React.FC = () => {
       <div className="container mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            怡安Aon测试模考系统
+            {language === 'zh' ? '怡安Aon测试模考系统' : 'Aon Assessment Simulation System'}
           </h1>
           <p className="text-xl md:text-2xl mb-10 text-primary-100">
-            熟悉测评题型，提升应试能力，为职场竞争做好准备
+            {language === 'zh' 
+              ? '熟悉测评题型，提升应试能力，为职场竞争做好准备' 
+              : 'Familiarize yourself with assessment formats and enhance your career competitiveness'}
           </p>
           
           {/* Language and Exam Mode Toggles */}

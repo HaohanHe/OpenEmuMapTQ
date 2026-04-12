@@ -23,6 +23,8 @@ export const DigitChallenge: React.FC<DigitChallengeProps> = ({
   const placeholders = equation.match(/\?/g) || [];
   const placeholderCount = placeholders.length;
 
+  const actualPlaceholderCount = placeholderCount || 2;
+
   useEffect(() => {
     // 当题目切换时，重置所有状态
     setIsEditing(false);
@@ -36,33 +38,28 @@ export const DigitChallenge: React.FC<DigitChallengeProps> = ({
     }
   }, [selectedAnswer]);
 
-  const validateAnswer = (inputDigits: string[]) => {
-    let equationStr = equation;
-    inputDigits.forEach(digit => {
-      equationStr = equationStr.replace('?', digit);
+  const validateAnswer = (digits: string[]) => {
+    if (digits.length !== actualPlaceholderCount) return false;
+    
+    let evalStr = equation;
+    digits.forEach(d => {
+      evalStr = evalStr.replace('?', d);
     });
     
+    // 安全地计算表达式，兼容中英文符号和除号
+    const safeExpression = evalStr.replace(/=/g, '===')
+                                  .replace(/×/g, '*')
+                                  .replace(/÷/g, '/');
+    
     try {
-      // 计算结果
-      const parts = equationStr.split('=');
-      const expression = parts[0].trim();
-      const targetStr = parts[1].trim();
-      
-      // 替换中文乘号为英文乘号
-      const safeExpression = expression.replace(/×/g, '*');
-      
-      // 安全计算 - 只允许数字和基本运算符
-      if (!/^[0-9+\-*/()\s]+$/.test(safeExpression)) {
-        return false;
+      // 允许额外的 / 符号
+      if (/^[0-9+\-*/()\s=]+$/.test(safeExpression)) {
+        return Function(`'use strict'; return (${safeExpression})`)();
       }
-      
-      const result = eval(safeExpression);
-      const target = parseInt(targetStr);
-      return result === target;
-    } catch (error) {
-      console.error('计算错误:', error);
-      return false;
+    } catch (e) {
+      console.error('Invalid expression', e);
     }
+    return false;
   };
 
   const handleDigitClick = (digit: string) => {
@@ -87,6 +84,11 @@ export const DigitChallenge: React.FC<DigitChallengeProps> = ({
       const newInput = input.slice(0, -1);
       setInput(newInput);
       setUsedDigits(usedDigits.filter(d => d !== lastDigit));
+      
+      // 如果之前已经提交了答案，删除时清空全局状态
+      if (input.length === placeholderCount) {
+        onSelect?.('');
+      }
     }
   };
 

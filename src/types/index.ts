@@ -23,7 +23,8 @@ export interface ScalesIxData {
 
 export interface DigitChallengeData {
   equation: string;
-  targetNumber: number;
+  placeholderCount?: number;
+  targetNumber?: number;
 }
 
 export interface GridInductiveData {
@@ -72,6 +73,6 @@ export interface QuizResult {
   completedAt: number;
 }
 
-export type QuizType = 'cognitive' | 'numerical' | 'verbal' | 'random' | 'aon_verbal' | 'aon_numerical' | 'aon_inductive' | 'aon_deductive_switch' | 'aon_inductive_scales' | 'aon_ap_reasoning' | 'aon_gap_challenge' | 'aon_digit_challenge' | 'aon_applied_numeracy' | 'aon_inductive_grid_fill';
+export type QuizType = 'cognitive' | 'numerical' | 'verbal' | 'random' | 'aon_verbal' | 'aon_numerical' | 'aon_inductive' | 'aon_inductive_grid' | 'aon_deductive_switch' | 'aon_inductive_scales' | 'aon_ap_reasoning' | 'aon_gap_challenge' | 'aon_digit_challenge' | 'aon_applied_numeracy' | 'aon_inductive_grid_fill';
 
 export type AonAnswer = 'TRUE' | 'FALSE' | 'CANNOT SAY';

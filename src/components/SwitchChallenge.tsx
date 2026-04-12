@@ -16,7 +16,7 @@ interface SwitchChallengeProps {
   isMultiStep?: boolean;
 }
 
-export const SwitchChallenge: React.FC<SwitchChallengeProps> = ({
+export const SwitchChallengeComponent: React.FC<SwitchChallengeProps> = ({
   inputShapes,
   outputShapes,
   options,
@@ -50,47 +50,43 @@ export const SwitchChallenge: React.FC<SwitchChallengeProps> = ({
   };
 
   const checkAndSubmit = (first: string, second: string) => {
-    if (first && second && correctAnswer) {
+    if (first && second) {
       const combinedAnswer = `${first}-${second}`;
-      if (combinedAnswer === correctAnswer) {
-        onSelect?.(combinedAnswer);
-      }
+      onSelect?.(combinedAnswer);
     }
   };
 
   const getButtonClass = (option: string) => {
-    if (!selectedAnswer) {
-      return 'bg-gray-700 border-gray-600 hover:bg-gray-600';
-    }
-    if (option === correctAnswer) {
-      return 'bg-yellow-400/30 border-yellow-500 text-yellow-300';
-    }
-    if (option === selectedAnswer && option !== correctAnswer) {
-      return 'bg-error/20 border-error text-error';
+    if (option === selectedAnswer) {
+      return 'bg-blue-500/30 border-blue-400 text-blue-300';
     }
     return 'bg-gray-800/60 border-gray-700 hover:bg-gray-700';
   };
 
   const getFirstCodeClass = (option: string) => {
     if (option === selectedFirstCode) {
-      return 'bg-gray-600 border-gray-500';
+      return 'bg-blue-500/30 border-blue-400 text-blue-300';
     }
     return 'bg-gray-800/60 border-gray-700 hover:bg-gray-700';
   };
 
   const getSecondCodeClass = (option: string) => {
     if (option === selectedSecondCode) {
-      return 'bg-gray-600 border-gray-500';
+      return 'bg-blue-500/30 border-blue-400 text-blue-300';
     }
     return 'bg-gray-800/60 border-gray-700 hover:bg-gray-700';
   };
 
   const getShapeColor = (shape: string) => {
     switch (shape) {
-      case 'circle': return '#EF4444';
-      case 'triangle': return '#3B82F6';
-      case 'cross': return '#F59E0B';
-      case 'star': return '#8B5CF6';
+      case 'circle': return '#EF4444'; // Red
+      case 'triangle': return '#3B82F6'; // Blue
+      case 'cross': return '#F59E0B'; // Yellow/Orange
+      case 'star': return '#8B5CF6'; // Purple
+      case 'diamond': return '#10B981'; // Green
+      case 'hexagon': return '#EC4899'; // Pink
+      case 'square': return '#06B6D4'; // Cyan
+      case 'x': return '#F97316'; // Orange
       default: return '#FFFFFF';
     }
   };
@@ -264,4 +260,5 @@ export const SwitchChallenge: React.FC<SwitchChallengeProps> = ({
   );
 };
 
+export const SwitchChallenge = React.memo(SwitchChallengeComponent);
 export default SwitchChallenge;

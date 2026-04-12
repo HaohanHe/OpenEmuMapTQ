@@ -22,22 +22,10 @@ export const ScalesIx: React.FC<ScalesIxProps> = ({
   };
 
   const getButtonClass = (index: number) => {
-    const isSelected = selectedAnswer === index;
-    const isCorrect = index === oddOneOutIndex;
-    
-    if (selectedAnswer === undefined) {
-      return 'bg-gray-800/60 border-gray-600 hover:bg-gray-700 hover:border-gray-500';
+    if (selectedAnswer === index) {
+      return 'bg-blue-500/30 border-blue-400 text-blue-300';
     }
-    
-    if (isCorrect) {
-      return 'bg-yellow-400/30 border-yellow-500 text-yellow-300';
-    }
-    
-    if (isSelected && !isCorrect) {
-      return 'bg-error/20 border-error text-error';
-    }
-    
-    return 'bg-gray-800/40 border-gray-700';
+    return 'bg-gray-800/60 border-gray-600 hover:bg-gray-700 hover:border-gray-500';
   };
 
   return (
@@ -52,26 +40,17 @@ export const ScalesIx: React.FC<ScalesIxProps> = ({
       </div>
 
       {/* 9个图形网格 */}
-      <div className="flex justify-center">
-        <div className="grid grid-cols-9 gap-3">
+      <div className="flex justify-center w-full overflow-x-auto pb-4 hide-scrollbar">
+        <div className="flex flex-nowrap gap-2 sm:gap-3 px-2 min-w-max">
           {allShapes.map((shape, index) => (
-            <button
-              key={index}
-              onClick={() => handleSelect(index)}
-              className={`p-3 rounded-lg border-2 transition-all duration-300 flex items-center justify-center ${getButtonClass(index)}`}
-            >
-              <Shape type={shape} size={40} />
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 数字标记 */}
-      <div className="flex justify-center">
-        <div className="grid grid-cols-9 gap-3 w-full max-w-2xl">
-          {allShapes.map((_, index) => (
-            <div key={index} className="text-center">
-              <span className="text-xs text-gray-500">{index + 1}</span>
+            <div key={index} className="flex flex-col items-center gap-2">
+              <button
+                onClick={() => handleSelect(index)}
+                className={`p-2 sm:p-3 rounded-lg border-2 transition-all duration-300 flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 ${getButtonClass(index)}`}
+              >
+                <Shape type={shape} size={32} />
+              </button>
+              <span className="text-xs text-gray-500 font-mono">{index + 1}</span>
             </div>
           ))}
         </div>

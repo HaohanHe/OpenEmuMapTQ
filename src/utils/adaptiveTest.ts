@@ -93,11 +93,14 @@ export const updateAdaptiveState = (
   const newUsedQuestionIds = new Set(adaptiveState.usedQuestionIds);
   newUsedQuestionIds.add(question.id);
 
+  // 使用更科学的自适应步长，随着题目数量增加，难度调整幅度减小（模拟 IRT 信息增量衰减）
+  const stepSize = Math.max(0.1, DIFFICULTY_ADJUSTMENT * (1 - (newQuestionHistory.length / 30)));
+  
   let newDifficulty = adaptiveState.currentDifficulty;
   if (isCorrect) {
-    newDifficulty = Math.min(newDifficulty + DIFFICULTY_ADJUSTMENT, MAX_DIFFICULTY);
+    newDifficulty = Math.min(newDifficulty + stepSize, MAX_DIFFICULTY);
   } else {
-    newDifficulty = Math.max(newDifficulty - DIFFICULTY_ADJUSTMENT, MIN_DIFFICULTY);
+    newDifficulty = Math.max(newDifficulty - stepSize, MIN_DIFFICULTY);
   }
 
   const recentAnswers = newQuestionHistory.slice(-5);
@@ -124,10 +127,18 @@ export const shouldCompleteTest = (adaptiveState: AdaptiveTestState): boolean =>
     return true;
   }
 
-  const recentAnswers = questionHistory.slice(-5);
-  if (recentAnswers.length === 5) {
-    const correctCount = recentAnswers.filter((a) => a.isCorrect).length;
-    if (correctCount === 0 || correctCount === 5) {
+  // 移除粗暴的“连续答对或答错5题就交卷”的判定。
+  // 在真实的 Aon 测试中，时间耗尽才是终止的主要条件。
+  // 这里的自适应逻辑仅用于“提前达到能力收敛”的判断。
+  // 我们使用方差来判断难度是否收敛：如果最近8题的难度方差极小，说明已经测出了真实水平。
+  if (questionHistory.length >= 8) {
+    const recentAnswers = questionHistory.slice(-8);
+    const difficulties = recentAnswers.map(a => a.difficulty);
+    const mean = difficulties.reduce((sum, d) => sum + d, 0) / difficulties.length;
+    const variance = difficulties.reduce((sum, d) => sum + Math.pow(d - mean, 2), 0) / difficulties.length;
+    
+    // 如果难度波动小于 0.05，说明已经收敛
+    if (variance < 0.05) {
       return true;
     }
   }
