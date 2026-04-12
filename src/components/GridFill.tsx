@@ -27,18 +27,19 @@ export const GridFill: React.FC<GridFillProps> = ({
 
   const getButtonClass = (index: number) => {
     const isSelected = selectedAnswer === index.toString();
-    const isCorrect = index.toString() === correctAnswer;
+    const isCorrect = correctAnswer !== undefined && index.toString() === correctAnswer;
+    const isWrong = correctAnswer !== undefined && isSelected && index.toString() !== correctAnswer;
     
-    if (!selectedAnswer) {
-      return 'bg-primary-800/60 border-primary-600 hover:bg-primary-700';
+    if (isSelected && correctAnswer === undefined) {
+      return 'bg-blue-500/30 border-blue-400 text-blue-300';
     }
     
     if (isCorrect) {
-      return 'bg-yellow-400/30 border-yellow-500';
+      return 'bg-success/20 border-success text-success shadow-[0_0_15px_rgba(16,185,129,0.3)]';
     }
     
-    if (isSelected && !isCorrect) {
-      return 'bg-error/20 border-error';
+    if (isWrong) {
+      return 'bg-error/20 border-error text-error shadow-[0_0_15px_rgba(239,68,68,0.3)]';
     }
     
     return 'bg-primary-800/40 border-primary-700';

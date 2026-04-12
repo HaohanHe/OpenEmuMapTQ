@@ -235,7 +235,7 @@ const Quiz: React.FC = () => {
                   outputShapes={currentQuestion.switchChallengeData.outputShapes}
                   options={currentQuestion.switchChallengeData.options}
                   selectedAnswer={selectedAnswer}
-                  correctAnswer={currentQuestion.correctAnswer}
+                  correctAnswer={isExamMode ? undefined : currentQuestion.correctAnswer}
                   onSelect={handleAnswerSelect}
                   intermediateShapes={currentQuestion.switchChallengeData.intermediateShapes}
                   firstCodeOptions={currentQuestion.switchChallengeData.firstCodeOptions}
@@ -262,6 +262,7 @@ const Quiz: React.FC = () => {
                   allShapes={currentQuestion.scalesIxData.allShapes}
                   oddOneOutIndex={currentQuestion.scalesIxData.oddOneOutIndex}
                   selectedAnswer={selectedAnswer ? parseInt(selectedAnswer) : undefined}
+                  correctAnswer={isExamMode ? undefined : parseInt(currentQuestion.correctAnswer)}
                   onSelect={(index) => handleAnswerSelect(index.toString())}
                 />
               )}
@@ -270,7 +271,7 @@ const Quiz: React.FC = () => {
               {currentQuestion.digitChallengeData && (
                 <DigitChallenge
                   equation={currentQuestion.digitChallengeData.equation}
-                  correctAnswer={currentQuestion.correctAnswer}
+                  correctAnswer={isExamMode ? undefined : currentQuestion.correctAnswer}
                   selectedAnswer={selectedAnswer}
                   onSelect={handleAnswerSelect}
                 />
@@ -281,7 +282,7 @@ const Quiz: React.FC = () => {
                 <GridInductive
                   exampleGrids={currentQuestion.gridInductiveData.exampleGrids}
                   questionGrids={currentQuestion.gridInductiveData.questionGrids}
-                  correctAnswer={currentQuestion.correctAnswer}
+                  correctAnswer={isExamMode ? undefined : currentQuestion.correctAnswer}
                   selectedAnswer={selectedAnswer}
                   onSelect={handleAnswerSelect}
                 />
@@ -294,7 +295,7 @@ const Quiz: React.FC = () => {
                   missingPosition={currentQuestion.gridFillData.missingPosition}
                   options={currentQuestion.gridFillData.options}
                   selectedAnswer={selectedAnswer}
-                  correctAnswer={currentQuestion.correctAnswer}
+                  correctAnswer={isExamMode ? undefined : currentQuestion.correctAnswer}
                   onSelect={handleAnswerSelect}
                 />
               )}
@@ -306,7 +307,7 @@ const Quiz: React.FC = () => {
                   dataSheet={currentQuestion.dataSheet}
                   options={currentQuestion.options}
                   selectedAnswer={selectedAnswer}
-                  correctAnswer={currentQuestion.correctAnswer}
+                  correctAnswer={isExamMode ? undefined : currentQuestion.correctAnswer}
                   onSelect={handleAnswerSelect}
                 />
               )}
@@ -321,7 +322,8 @@ const Quiz: React.FC = () => {
                 <div className="space-y-3">
                   {currentQuestion.options.map((option, index) => {
                     const isSelected = selectedAnswer === option;
-                    const isCorrect = selectedAnswer && option === currentQuestion.correctAnswer;
+                    const isCorrect = !isExamMode && option === currentQuestion.correctAnswer;
+                    const isWrong = !isExamMode && isSelected && option !== currentQuestion.correctAnswer;
                     
                     // Aon风格题目特殊样式
                     const isAonStyle = currentQuestion.isAonStyle || false;
@@ -331,11 +333,15 @@ const Quiz: React.FC = () => {
                         key={index}
                         onClick={() => handleAnswerSelect(option)}
                         className={`w-full text-left p-4 rounded-lg border transition-all duration-300 ${
-                          isSelected 
-                            ? (isCorrect ? 'bg-success/20 border-success text-success' : 'bg-error/20 border-error text-error') 
-                            : isAonStyle 
-                              ? 'bg-primary-800/80 border-primary-600 hover:bg-primary-800' 
-                              : 'bg-primary-800/50 border-primary-700 hover:bg-primary-800'
+                          isSelected && isExamMode
+                            ? 'bg-blue-500/20 border-blue-500 text-blue-300'
+                            : isCorrect
+                              ? 'bg-success/20 border-success text-success shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+                              : isWrong
+                                ? 'bg-error/20 border-error text-error shadow-[0_0_15px_rgba(239,68,68,0.3)]'
+                                : isAonStyle 
+                                  ? 'bg-primary-800/80 border-primary-600 hover:bg-primary-800 hover:border-primary-500' 
+                                  : 'bg-primary-800/50 border-primary-700 hover:bg-primary-800 hover:border-primary-500'
                         }`}
                         aria-label={`Select answer: ${option}`}
                         tabIndex={0}
@@ -343,13 +349,18 @@ const Quiz: React.FC = () => {
                       >
                         <div className="flex items-center">
                           <div className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 ${
-                            isSelected 
-                              ? (isCorrect ? 'bg-success text-white' : 'bg-error text-white') 
-                              : isAonStyle 
-                                ? 'border-2 border-primary-500' 
-                                : 'border border-primary-500'
+                            isSelected && isExamMode
+                              ? 'bg-blue-500 text-white'
+                              : isCorrect
+                                ? 'bg-success text-white'
+                                : isWrong
+                                  ? 'bg-error text-white'
+                                  : isAonStyle 
+                                    ? 'border-2 border-primary-500 text-primary-300' 
+                                    : 'border border-primary-500 text-primary-300'
                           }`}>
-                            {isSelected && <Check className="w-4 h-4" />}
+                            {isSelected && isExamMode && <Check className="w-4 h-4" />}
+                            {isCorrect && <Check className="w-4 h-4" />}
                           </div>
                           <span className={isAonStyle ? 'font-medium' : ''}>{option}</span>
                         </div>
@@ -358,6 +369,23 @@ const Quiz: React.FC = () => {
                   })}
                 </div>
               </>
+            )}
+
+            {/* 解析区域 (仅在练习模式且已作答时显示) */}
+            {!isExamMode && selectedAnswer && currentQuestion.explanation && (
+              <div className="mt-8 p-6 bg-primary-800/60 rounded-xl border border-primary-600 shadow-md animate-fade-in">
+                <h3 className="text-lg font-bold text-primary-300 mb-3 flex items-center">
+                  <span className="bg-primary-700 p-1.5 rounded-lg mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                  </span>
+                  {language === 'zh' ? '答案解析' : 'Explanation'}
+                </h3>
+                <p className="text-primary-100 whitespace-pre-wrap leading-relaxed text-sm md:text-base">
+                  {currentQuestion.explanation}
+                </p>
+              </div>
             )}
           </div>
 

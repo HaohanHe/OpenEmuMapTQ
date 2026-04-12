@@ -2,10 +2,11 @@ import React from 'react';
 import Shape from './Shape';
 import { useLanguageStore } from '@/store/languageStore';
 
-interface ScalesIxProps {
+export interface ScalesIxProps {
   allShapes: string[];
   oddOneOutIndex: number;
   selectedAnswer?: number;
+  correctAnswer?: number;
   onSelect?: (index: number) => void;
 }
 
@@ -13,6 +14,7 @@ export const ScalesIx: React.FC<ScalesIxProps> = ({
   allShapes,
   oddOneOutIndex,
   selectedAnswer,
+  correctAnswer,
   onSelect
 }) => {
   const { language } = useLanguageStore();
@@ -22,9 +24,22 @@ export const ScalesIx: React.FC<ScalesIxProps> = ({
   };
 
   const getButtonClass = (index: number) => {
-    if (selectedAnswer === index) {
+    const isSelected = selectedAnswer === index;
+    const isCorrect = correctAnswer !== undefined && index === correctAnswer;
+    const isWrong = correctAnswer !== undefined && isSelected && index !== correctAnswer;
+
+    if (isSelected && correctAnswer === undefined) {
       return 'bg-blue-500/30 border-blue-400 text-blue-300';
     }
+    
+    if (isCorrect) {
+      return 'bg-success/20 border-success text-success shadow-[0_0_15px_rgba(16,185,129,0.3)]';
+    }
+    
+    if (isWrong) {
+      return 'bg-error/20 border-error text-error shadow-[0_0_15px_rgba(239,68,68,0.3)]';
+    }
+
     return 'bg-gray-800/60 border-gray-600 hover:bg-gray-700 hover:border-gray-500';
   };
 

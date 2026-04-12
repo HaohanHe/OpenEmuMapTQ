@@ -139,18 +139,22 @@ export const NumericalReasoning: React.FC<NumericalReasoningProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {options.map((option, index) => {
             const isSelected = selectedAnswer === option;
-            const isCorrect = selectedAnswer && option === correctAnswer;
+            const isCorrect = correctAnswer !== undefined && option === correctAnswer;
+            const isWrong = correctAnswer !== undefined && isSelected && option !== correctAnswer;
 
             return (
               <button
                 key={index}
                 onClick={() => handleSelect(option)}
-                className={`px-4 py-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-center font-medium text-lg ${isSelected
-                  ? isCorrect
-                    ? 'bg-success/20 border-success text-success shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-                    : 'bg-error/20 border-error text-error shadow-[0_0_15px_rgba(239,68,68,0.3)]'
-                  : 'bg-primary-700/50 border-primary-600 text-primary-200 hover:bg-primary-700 hover:border-primary-400 hover:text-white'
-                  }`}
+                className={`px-4 py-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-center font-medium text-lg ${
+                  isSelected && correctAnswer === undefined
+                    ? 'bg-blue-500/20 border-blue-500 text-blue-300'
+                    : isCorrect
+                      ? 'bg-success/20 border-success text-success shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+                      : isWrong
+                        ? 'bg-error/20 border-error text-error shadow-[0_0_15px_rgba(239,68,68,0.3)]'
+                        : 'bg-primary-700/50 border-primary-600 text-primary-200 hover:bg-primary-700 hover:border-primary-400 hover:text-white'
+                }`}
               >
                 {option}
               </button>

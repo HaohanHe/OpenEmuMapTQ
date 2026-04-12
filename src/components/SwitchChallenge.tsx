@@ -57,22 +57,58 @@ export const SwitchChallengeComponent: React.FC<SwitchChallengeProps> = ({
   };
 
   const getButtonClass = (option: string) => {
-    if (option === selectedAnswer) {
+    const isSelected = option === selectedAnswer;
+    const isCorrect = correctAnswer !== undefined && option === correctAnswer;
+    const isWrong = correctAnswer !== undefined && isSelected && option !== correctAnswer;
+
+    if (isSelected && correctAnswer === undefined) {
       return 'bg-blue-500/30 border-blue-400 text-blue-300';
+    }
+    if (isCorrect) {
+      return 'bg-success/20 border-success text-success shadow-[0_0_15px_rgba(16,185,129,0.3)]';
+    }
+    if (isWrong) {
+      return 'bg-error/20 border-error text-error shadow-[0_0_15px_rgba(239,68,68,0.3)]';
     }
     return 'bg-gray-800/60 border-gray-700 hover:bg-gray-700';
   };
 
   const getFirstCodeClass = (option: string) => {
-    if (option === selectedFirstCode) {
+    const isSelected = option === selectedFirstCode;
+    const isCorrect = correctAnswer !== undefined && correctAnswer.split('-')[0] === option;
+    const isWrong = correctAnswer !== undefined && isSelected && correctAnswer.split('-')[0] !== option;
+
+    if (isSelected && correctAnswer === undefined) {
       return 'bg-blue-500/30 border-blue-400 text-blue-300';
+    }
+    if (isCorrect && selectedAnswer) {
+      return 'bg-success/20 border-success text-success shadow-[0_0_15px_rgba(16,185,129,0.3)]';
+    }
+    if (isWrong && selectedAnswer) {
+      return 'bg-error/20 border-error text-error shadow-[0_0_15px_rgba(239,68,68,0.3)]';
+    }
+    if (isSelected) {
+      return 'bg-blue-500/30 border-blue-400 text-blue-300'; // Only selected, not yet fully answered
     }
     return 'bg-gray-800/60 border-gray-700 hover:bg-gray-700';
   };
 
   const getSecondCodeClass = (option: string) => {
-    if (option === selectedSecondCode) {
+    const isSelected = option === selectedSecondCode;
+    const isCorrect = correctAnswer !== undefined && correctAnswer.split('-')[1] === option;
+    const isWrong = correctAnswer !== undefined && isSelected && correctAnswer.split('-')[1] !== option;
+
+    if (isSelected && correctAnswer === undefined) {
       return 'bg-blue-500/30 border-blue-400 text-blue-300';
+    }
+    if (isCorrect && selectedAnswer) {
+      return 'bg-success/20 border-success text-success shadow-[0_0_15px_rgba(16,185,129,0.3)]';
+    }
+    if (isWrong && selectedAnswer) {
+      return 'bg-error/20 border-error text-error shadow-[0_0_15px_rgba(239,68,68,0.3)]';
+    }
+    if (isSelected) {
+      return 'bg-blue-500/30 border-blue-400 text-blue-300'; // Only selected, not yet fully answered
     }
     return 'bg-gray-800/60 border-gray-700 hover:bg-gray-700';
   };
@@ -126,7 +162,7 @@ export const SwitchChallengeComponent: React.FC<SwitchChallengeProps> = ({
               <button
                 key={index}
                 onClick={() => handleFirstCodeSelect(option)}
-                className={`w-24 h-10 rounded-lg border-2 transition-all duration-300 font-mono text-lg font-bold flex items-center justify-center ${selectedAnswer && option === correctAnswer?.split('-')[0] ? 'bg-yellow-400/30 border-yellow-500 text-yellow-300' : getFirstCodeClass(option)}`}
+                className={`w-24 h-10 rounded-lg border-2 transition-all duration-300 font-mono text-lg font-bold flex items-center justify-center ${getFirstCodeClass(option)}`}
               >
                 {option}
               </button>
@@ -166,7 +202,7 @@ export const SwitchChallengeComponent: React.FC<SwitchChallengeProps> = ({
               <button
                 key={index}
                 onClick={() => handleSecondCodeSelect(option)}
-                className={`w-24 h-10 rounded-lg border-2 transition-all duration-300 font-mono text-lg font-bold flex items-center justify-center ${selectedAnswer && option === correctAnswer?.split('-')[1] ? 'bg-yellow-400/30 border-yellow-500 text-yellow-300' : getSecondCodeClass(option)}`}
+                className={`w-24 h-10 rounded-lg border-2 transition-all duration-300 font-mono text-lg font-bold flex items-center justify-center ${getSecondCodeClass(option)}`}
               >
                 {option}
               </button>

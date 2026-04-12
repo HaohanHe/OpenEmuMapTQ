@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Shape } from './Shape';
 import { useLanguageStore } from '@/store/languageStore';
 
-interface GridInductiveProps {
+export interface GridInductiveProps {
   exampleGrids: (string | null)[][][];
   questionGrids: (string | null)[][][];
-  correctAnswer: string;
+  correctAnswer?: string;
   selectedAnswer?: string;
   onSelect?: (answer: string) => void;
 }
@@ -48,9 +48,32 @@ export const GridInductive: React.FC<GridInductiveProps> = ({
   };
 
   const getGridClass = (index: number) => {
-    if (selectedGrids.includes(index)) {
+    const isSelected = selectedGrids.includes(index);
+    let isCorrect = false;
+    let isWrong = false;
+
+    if (correctAnswer && selectedAnswer) {
+      const correctIndices = correctAnswer.split(',').map(Number);
+      if (correctIndices.includes(index)) {
+        isCorrect = true;
+      }
+      if (isSelected && !correctIndices.includes(index)) {
+        isWrong = true;
+      }
+    }
+
+    if (isSelected && (!correctAnswer || !selectedAnswer)) {
       return 'border-blue-400 bg-blue-500/30 text-blue-300 shadow-[0_0_15px_rgba(59,130,246,0.3)]';
     }
+
+    if (isCorrect) {
+      return 'border-success bg-success/20 text-success shadow-[0_0_15px_rgba(16,185,129,0.3)]';
+    }
+
+    if (isWrong) {
+      return 'border-error bg-error/20 text-error shadow-[0_0_15px_rgba(239,68,68,0.3)]';
+    }
+
     return 'border-gray-600 bg-gray-800/60 hover:bg-gray-700/80 transition-colors';
   };
 
@@ -69,6 +92,18 @@ export const GridInductive: React.FC<GridInductiveProps> = ({
     const index = gridIndex || 0;
     const isSelected = gridIndex !== null && selectedGrids.includes(gridIndex);
     const hasSelection = gridIndex !== null;
+
+    let isCorrect = false;
+    let isWrong = false;
+    if (correctAnswer && selectedAnswer && gridIndex !== null) {
+      const correctIndices = correctAnswer.split(',').map(Number);
+      if (correctIndices.includes(index)) {
+        isCorrect = true;
+      }
+      if (isSelected && !correctIndices.includes(index)) {
+        isWrong = true;
+      }
+    }
     
     return (
       <div 
@@ -83,9 +118,13 @@ export const GridInductive: React.FC<GridInductiveProps> = ({
         {hasSelection && (
           <div className="flex items-center mb-1">
             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-              isSelected 
+              isSelected && (!correctAnswer || !selectedAnswer)
                 ? 'bg-blue-500 text-white' 
-                : 'bg-gray-700 text-gray-300'
+                : isCorrect 
+                  ? 'bg-success text-white'
+                  : isWrong 
+                    ? 'bg-error text-white'
+                    : 'bg-gray-700 text-gray-300'
             }`}>
               {index}
             </div>

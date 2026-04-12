@@ -25,10 +25,23 @@ export const GridChallenge: React.FC<GridChallengeProps> = ({
   };
 
   const getButtonClass = (shape: string) => {
-    if (shape === selectedAnswer) {
-      return 'bg-blue-500/30 border-blue-400 text-blue-300';
+    const isSelected = shape === selectedAnswer;
+    const isCorrect = correctAnswer !== undefined && shape === correctAnswer;
+    const isWrong = correctAnswer !== undefined && isSelected && shape !== correctAnswer;
+
+    if (isSelected && correctAnswer === undefined) {
+      return 'border-blue-500 bg-blue-50 scale-105 shadow-md';
     }
-    return 'bg-primary-800/80 border-primary-600 hover:bg-primary-800';
+    
+    if (isCorrect) {
+      return 'border-green-500 bg-green-50 scale-105 shadow-md ring-2 ring-green-400';
+    }
+    
+    if (isWrong) {
+      return 'border-red-500 bg-red-50 scale-105 shadow-md ring-2 ring-red-400';
+    }
+
+    return 'border-transparent hover:bg-gray-50 hover:scale-105';
   };
 
   const getShapeColor = (shape: string) => {
@@ -94,11 +107,7 @@ export const GridChallenge: React.FC<GridChallengeProps> = ({
                 <button
                   key={index}
                   onClick={() => handleSelect(shape)}
-                  className={`p-3 sm:p-4 rounded border-2 transition-all duration-200 ${
-                    shape === selectedAnswer 
-                      ? 'border-blue-500 bg-blue-50 scale-105 shadow-md' 
-                      : 'border-transparent hover:bg-gray-50 hover:scale-105'
-                  }`}
+                  className={`p-3 sm:p-4 rounded border-2 transition-all duration-200 ${getButtonClass(shape)}`}
                 >
                   <Shape type={shape} size={40} color={getShapeColor(shape)} />
                 </button>

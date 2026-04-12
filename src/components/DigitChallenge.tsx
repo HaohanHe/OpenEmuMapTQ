@@ -4,7 +4,7 @@ import { Trash2 } from 'lucide-react';
 
 interface DigitChallengeProps {
   equation: string;
-  correctAnswer: string;
+  correctAnswer?: string;
   selectedAnswer: string;
   onSelect: (answer: string) => void;
 }
@@ -121,18 +121,28 @@ export const DigitChallenge: React.FC<DigitChallengeProps> = ({
         const digit = currentDigits[inputIndex];
         const isCorrect = isAnswerCorrect();
         const hasAnswer = isEditing ? input.length === placeholderCount : (selectedAnswer || input.length === placeholderCount);
+        const isSelected = inputIndex === currentDigits.length && currentDigits.length < placeholderCount;
+
+        let digitClass = 'inline-flex items-center justify-center w-12 h-14 sm:w-16 sm:h-20 mx-1 rounded-xl border-2 text-2xl sm:text-3xl font-bold transition-all duration-200 ';
+        
+        if (correctAnswer !== undefined && hasAnswer) {
+          if (isCorrect) {
+            digitClass += 'bg-success/20 border-success text-success shadow-[0_0_15px_rgba(16,185,129,0.3)]';
+          } else {
+            digitClass += 'bg-error/20 border-error text-error shadow-[0_0_15px_rgba(239,68,68,0.3)]';
+          }
+        } else if (isSelected) {
+          digitClass += 'border-blue-400 bg-blue-500/20 text-blue-300 shadow-[0_0_10px_rgba(59,130,246,0.3)] animate-pulse-light';
+        } else if (digit) {
+          digitClass += 'border-blue-500/50 bg-blue-500/10 text-blue-200';
+        } else {
+          digitClass += 'border-primary-600 bg-primary-800/40 text-primary-400';
+        }
+
         parts.push(
           <span 
             key={`placeholder-${inputIndex}`}
-            className={`inline-flex items-center justify-center w-12 h-14 mx-1 rounded-lg border-2 text-2xl font-bold ${
-              digit 
-                ? hasAnswer 
-                  ? (isCorrect 
-                      ? 'border-success bg-success/20 text-success' 
-                      : 'border-error bg-error/20 text-error')
-                  : 'border-primary-400 bg-primary-900/30 text-white'
-                : 'border-primary-600 bg-primary-900/50 text-primary-500 border-dashed'
-            }`}
+            className={digitClass}
           >
             {digit || '?'}
           </span>
