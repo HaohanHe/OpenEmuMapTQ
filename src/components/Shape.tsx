@@ -6,19 +6,17 @@ interface ShapeProps {
   color?: string;
 }
 
-export const Shape: React.FC<ShapeProps> = ({ type, size = 40, color = '#6366f1' }) => {
+export const Shape: React.FC<ShapeProps> = ({ type, size = 40, color = '#000000' }) => {
   const strokeColor = color;
-  const fillColor = `${color}33`;
+  const fillColor = color;
 
   switch (type) {
     case 'triangle':
       return (
         <svg width={size} height={size} viewBox="0 0 40 40">
           <polygon 
-            points="20,5 35,35 5,35" 
+            points="20,5 35,33 5,33" 
             fill={fillColor} 
-            stroke={strokeColor} 
-            strokeWidth="2" 
           />
         </svg>
       );
@@ -30,8 +28,6 @@ export const Shape: React.FC<ShapeProps> = ({ type, size = 40, color = '#6366f1'
             cy="20" 
             r="15" 
             fill={fillColor} 
-            stroke={strokeColor} 
-            strokeWidth="2" 
           />
         </svg>
       );
@@ -41,8 +37,6 @@ export const Shape: React.FC<ShapeProps> = ({ type, size = 40, color = '#6366f1'
           <polygon 
             points="20,5 23,15 34,15 25,22 28,33 20,26 12,33 15,22 6,15 17,15" 
             fill={fillColor} 
-            stroke={strokeColor} 
-            strokeWidth="2" 
           />
         </svg>
       );
@@ -50,18 +44,14 @@ export const Shape: React.FC<ShapeProps> = ({ type, size = 40, color = '#6366f1'
       return (
         <svg width={size} height={size} viewBox="0 0 40 40">
           <rect 
-            x="17" y="8" 
-            width="6" height="24" 
+            x="14" y="6" 
+            width="12" height="28" 
             fill={fillColor} 
-            stroke={strokeColor} 
-            strokeWidth="2" 
           />
           <rect 
-            x="8" y="17" 
-            width="24" height="6" 
+            x="6" y="14" 
+            width="28" height="12" 
             fill={fillColor} 
-            stroke={strokeColor} 
-            strokeWidth="2" 
           />
         </svg>
       );
@@ -71,8 +61,6 @@ export const Shape: React.FC<ShapeProps> = ({ type, size = 40, color = '#6366f1'
           <polygon 
             points="20,5 35,20 20,35 5,20" 
             fill={fillColor} 
-            stroke={strokeColor} 
-            strokeWidth="2" 
           />
         </svg>
       );
@@ -82,8 +70,6 @@ export const Shape: React.FC<ShapeProps> = ({ type, size = 40, color = '#6366f1'
           <polygon 
             points="20,5 33,12 33,28 20,35 7,28 7,12" 
             fill={fillColor} 
-            stroke={strokeColor} 
-            strokeWidth="2" 
           />
         </svg>
       );
@@ -91,11 +77,9 @@ export const Shape: React.FC<ShapeProps> = ({ type, size = 40, color = '#6366f1'
       return (
         <svg width={size} height={size} viewBox="0 0 40 40">
           <rect 
-            x="8" y="8" 
-            width="24" height="24" 
+            x="7" y="7" 
+            width="26" height="26" 
             fill={fillColor} 
-            stroke={strokeColor} 
-            strokeWidth="2" 
           />
         </svg>
       );
@@ -103,18 +87,18 @@ export const Shape: React.FC<ShapeProps> = ({ type, size = 40, color = '#6366f1'
       return (
         <svg width={size} height={size} viewBox="0 0 40 40">
           <line 
-            x1="10" y1="10" 
-            x2="30" y2="30" 
+            x1="8" y1="8" 
+            x2="32" y2="32" 
             stroke={strokeColor} 
-            strokeWidth="3" 
-            strokeLinecap="round" 
+            strokeWidth="6" 
+            strokeLinecap="square" 
           />
           <line 
-            x1="30" y1="10" 
-            x2="10" y2="30" 
+            x1="32" y1="8" 
+            x2="8" y2="32" 
             stroke={strokeColor} 
-            strokeWidth="3" 
-            strokeLinecap="round" 
+            strokeWidth="6" 
+            strokeLinecap="square" 
           />
         </svg>
       );
@@ -122,11 +106,9 @@ export const Shape: React.FC<ShapeProps> = ({ type, size = 40, color = '#6366f1'
       return (
         <svg width={size} height={size} viewBox="0 0 40 40">
           <rect 
-            x="8" y="8" 
-            width="24" height="24" 
+            x="7" y="7" 
+            width="26" height="26" 
             fill={fillColor} 
-            stroke={strokeColor} 
-            strokeWidth="2" 
           />
         </svg>
       );

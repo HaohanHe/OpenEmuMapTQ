@@ -30,49 +30,35 @@ export const GridChallenge: React.FC<GridChallengeProps> = ({
     const isWrong = correctAnswer !== undefined && isSelected && shape !== correctAnswer;
 
     if (isSelected && correctAnswer === undefined) {
-      return 'border-blue-500 bg-blue-50 scale-105 shadow-md';
+      return 'border-blue-500 bg-blue-50 scale-105';
     }
     
     if (isCorrect) {
-      return 'border-green-500 bg-green-50 scale-105 shadow-md ring-2 ring-green-400';
+      return 'border-green-500 bg-green-50 scale-105 ring-2 ring-green-400';
     }
     
     if (isWrong) {
-      return 'border-red-500 bg-red-50 scale-105 shadow-md ring-2 ring-red-400';
+      return 'border-red-500 bg-red-50 scale-105 ring-2 ring-red-400';
     }
 
-    return 'border-transparent hover:bg-gray-50 hover:scale-105';
-  };
-
-  const getShapeColor = (shape: string) => {
-    switch (shape) {
-      case 'circle': return '#A855F7'; // Purple
-      case 'triangle': return '#84CC16'; // Green
-      case 'cross': return '#F97316'; // Orange
-      case 'star': return '#06B6D4'; // Cyan
-      case 'square': return '#EC4899'; // Pink/Magenta
-      case 'diamond': return '#EF4444'; // Red
-      case 'hexagon': return '#3B82F6'; // Blue
-      case 'x': return '#EAB308'; // Yellow
-      default: return '#FFFFFF';
-    }
+    return 'border-transparent hover:bg-gray-200';
   };
 
   const gridSize = grid.length;
 
   return (
-    <div className="space-y-10">
+    <div className="flex flex-col items-center pt-8 w-full">
       {/* 题目说明 */}
-      <div className="text-center mb-6">
+      <div className="text-center mb-10 px-4">
         <h2 className="text-xl font-bold text-white mb-2">{language === 'zh' ? '演绎逻辑推理' : 'Deductive Logical Reasoning'}</h2>
         <p className="text-primary-300">{language === 'zh' ? '找出完成网格的形状。任何行或列中都没有重复的形状。' : 'Find the shape that completes the grid. No shape is repeated in any row or column.'}</p>
       </div>
 
       {/* 网格 */}
-      <div className="flex justify-center">
-        <div className="bg-white p-2 rounded-lg border border-gray-300 shadow-md">
+      <div className="bg-white p-4 sm:p-8 rounded-xl mb-8 relative z-10 w-[90%] max-w-md">
+        <div className="flex justify-center">
           <div 
-            className="grid gap-1 bg-gray-200 p-1" 
+            className="grid gap-1.5" 
             style={{ gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))` }}
           >
             {grid.map((row, rowIndex) => (
@@ -81,14 +67,14 @@ export const GridChallenge: React.FC<GridChallengeProps> = ({
                 return (
                   <div
                     key={`${rowIndex}-${colIndex}`}
-                    className={`w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center bg-white ${
-                      isTarget ? 'bg-gray-100' : ''
+                    className={`w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center rounded-md ${
+                      isTarget ? 'bg-[#e5e5e5]' : 'bg-[#e5e5e5]'
                     }`}
                   >
                     {isTarget ? (
-                      <div className="text-3xl text-gray-700 font-medium">?</div>
+                      <div className="text-3xl sm:text-4xl text-[#333333] font-normal">?</div>
                     ) : shape ? (
-                      <Shape type={shape} size={36} color={getShapeColor(shape)} />
+                      <Shape type={shape} size={48} color="#1a1a1a" />
                     ) : null}
                   </div>
                 );
@@ -98,22 +84,18 @@ export const GridChallenge: React.FC<GridChallengeProps> = ({
         </div>
       </div>
 
-      {/* 选项 */}
-      <div className="mt-10">
-        <div className="flex justify-center">
-          <div className="bg-[#a8c7c9] p-2 rounded-lg shadow-inner">
-            <div className="flex bg-white rounded gap-2 sm:gap-4 p-2">
-              {options.map((shape, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSelect(shape)}
-                  className={`p-3 sm:p-4 rounded border-2 transition-all duration-200 ${getButtonClass(shape)}`}
-                >
-                  <Shape type={shape} size={40} color={getShapeColor(shape)} />
-                </button>
-              ))}
-            </div>
-          </div>
+      {/* 选项栏 - 全屏宽度 */}
+      <div className="w-[100vw] ml-[calc(50%-50vw)] bg-[#1a1a1a] py-6 sm:py-8 mt-4 shadow-2xl z-20">
+        <div className="flex justify-center gap-3 sm:gap-5 px-4">
+          {options.map((shape, index) => (
+            <button
+              key={index}
+              onClick={() => handleSelect(shape)}
+              className={`w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center bg-white rounded-md border-4 transition-all duration-200 ${getButtonClass(shape)}`}
+            >
+              <Shape type={shape} size={40} color="#1a1a1a" />
+            </button>
+          ))}
         </div>
       </div>
     </div>
