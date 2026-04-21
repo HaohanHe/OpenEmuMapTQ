@@ -12,6 +12,7 @@ const DigitChallenge = lazy(() => import('@/components/DigitChallenge'));
 const GridInductive = lazy(() => import('@/components/GridInductive'));
 const GridFill = lazy(() => import('@/components/GridFill'));
 const NumericalReasoning = lazy(() => import('@/components/NumericalReasoning'));
+const VerbalReasoning = lazy(() => import('@/components/VerbalReasoning'));
 
 const Quiz: React.FC = () => {
   const { type } = useParams<{ type: string }>();
@@ -189,7 +190,7 @@ const Quiz: React.FC = () => {
           {/* 题目内容 */}
           <div className="mb-8">
             {/* 数据表格（Aon风格题目） */}
-            {currentQuestion.dataSheet && currentQuestion.type !== 'aon_numerical' && (
+            {currentQuestion.dataSheet && currentQuestion.type !== 'aon_numerical' && currentQuestion.type !== 'aon_verbal' && (
               <div className="mb-8 p-6 bg-primary-800/60 rounded-xl border border-primary-700 overflow-x-auto">
                 <h3 className="text-lg font-semibold mb-4 text-primary-300">数据表格</h3>
                 {currentQuestion.dataSheet.includes('[TABLE]') ? (
@@ -311,10 +312,23 @@ const Quiz: React.FC = () => {
                   onSelect={handleAnswerSelect}
                 />
               )}
+
+              {/* 文字推理题目 */}
+              {currentQuestion.type === 'aon_verbal' && currentQuestion.dataSheet && (
+                <VerbalReasoning
+                  content={currentQuestion.content}
+                  dataSheet={currentQuestion.dataSheet}
+                  options={currentQuestion.options}
+                  selectedAnswer={selectedAnswer}
+                  correctAnswer={isExamMode ? undefined : currentQuestion.correctAnswer}
+                  onSelect={handleAnswerSelect}
+                  isExamMode={isExamMode}
+                />
+              )}
             </Suspense>
             
             {/* 普通题目 (包括 AP Reasoning) */}
-            {!currentQuestion.switchChallengeData && !currentQuestion.gridChallengeData && !currentQuestion.scalesIxData && !currentQuestion.digitChallengeData && !currentQuestion.gridInductiveData && !currentQuestion.gridFillData && currentQuestion.type !== 'aon_numerical' && (
+            {!currentQuestion.switchChallengeData && !currentQuestion.gridChallengeData && !currentQuestion.scalesIxData && !currentQuestion.digitChallengeData && !currentQuestion.gridInductiveData && !currentQuestion.gridFillData && currentQuestion.type !== 'aon_numerical' && currentQuestion.type !== 'aon_verbal' && (
               <>
                 <h2 className="text-xl md:text-2xl font-bold mb-6 leading-relaxed whitespace-pre-wrap">{currentQuestion.content}</h2>
                 
