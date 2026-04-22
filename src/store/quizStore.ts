@@ -35,6 +35,7 @@ interface QuizState {
   
   // 操作方法
   startQuiz: (type: QuizType, examMode?: boolean, adaptiveMode?: boolean) => void;
+  startTimer: () => void;
   selectAnswer: (answer: string) => void;
   nextQuestion: () => void;
   prevQuestion: () => void;
@@ -121,6 +122,8 @@ export const useQuizStore = create<QuizState>()(
           let timeLimit = 600; // 默认10分钟
           switch (type) {
             case 'aon_verbal':
+              timeLimit = 360; // 真实测试：6分钟 (18题)
+              break;
             case 'aon_numerical':
               timeLimit = 720; // 真实测试：12分钟 (37/49题)
               break;
@@ -166,7 +169,7 @@ export const useQuizStore = create<QuizState>()(
             allQuestions,
             timeLimit: timeLimit,
             timeRemaining: timeLimit,
-            isTimerRunning: true,
+            isTimerRunning: false, // 初始不运行计时器，由UI控制何时开始
             isExamMode: examMode,
             currentResult: null,
           });
@@ -174,6 +177,11 @@ export const useQuizStore = create<QuizState>()(
           console.error('Error starting quiz:', error);
           // 可以添加错误状态或提示
         }
+      },
+
+      // 开始计时
+      startTimer: () => {
+        set({ isTimerRunning: true });
       },
       
       // 选择答案

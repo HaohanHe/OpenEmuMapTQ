@@ -3979,8 +3979,17 @@ export const getQuestionsByType = (type: string) => {
       return gridInductiveQuestions;
     case 'aon_inductive_grid_fill':
       return gridFillQuestions;
-    case 'aon_verbal':
-      return basicVerbalQuestions;
+    case 'aon_verbal': {
+      // 筛选出属于同一套题干的18道题（以 'verbal-evig' 为前缀），并进行打乱
+      const evigQuestions = basicVerbalQuestions.filter(q => q.id.startsWith('verbal-evig-'));
+      const otherVerbalQuestions = basicVerbalQuestions.filter(q => !q.id.startsWith('verbal-evig-'));
+      
+      // 如果我们有足够的evig题目，就返回18道打乱的。否则混入其他题目
+      if (evigQuestions.length >= 18) {
+        return evigQuestions.sort(() => 0.5 - Math.random()).slice(0, 18);
+      }
+      return basicVerbalQuestions.sort(() => 0.5 - Math.random()).slice(0, 18);
+    }
     case 'aon_numerical':
       return basicNumericalQuestions;
     case 'aon_applied_numeracy':

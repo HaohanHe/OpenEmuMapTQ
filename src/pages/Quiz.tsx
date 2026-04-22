@@ -34,21 +34,30 @@ const Quiz: React.FC = () => {
     updateTime,
     resetQuiz,
     startQuiz,
+    startTimer,
+    timeLimit,
   } = useQuizStore();
 
   const { language } = useLanguageStore();
 
   const [selectedAnswer, setSelectedAnswer] = useState('');
   const [hasStarted, setHasStarted] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
 
   // 当类型变化时，自动开始测试
   useEffect(() => {
     // 只有在未开始且题目为空时才触发，避免因刷新页面触发重复生成
     if (type && questions.length === 0 && !hasStarted) {
       setHasStarted(true);
+      setShowIntro(true);
       startQuiz(type as QuizType, false, type === 'random' || type === 'aon_inductive_grid_fill');
     }
   }, [type, questions.length, startQuiz, hasStarted]);
+
+  const handleStartTest = () => {
+    setShowIntro(false);
+    startTimer();
+  };
 
   // 处理计时器
   useEffect(() => {
@@ -118,6 +127,53 @@ const Quiz: React.FC = () => {
   const currentQuestion = questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
+
+  if (showIntro) {
+    const totalMins = Math.floor(timeLimit / 60);
+    return (
+      <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center text-[#333] font-sans">
+        <div className="max-w-4xl w-full bg-white p-8 sm:p-12 rounded-xl shadow-lg m-4">
+          <p className="text-gray-600 mb-8 border-b pb-6 text-lg">
+            您已经完成示例，应该对测试的操作完全了解。如有需要，请重新阅读说明。
+          </p>
+          
+          <h2 className="text-xl font-bold mb-6">请注意：</h2>
+          
+          {type === 'aon_verbal' ? (
+            <ul className="list-disc pl-6 space-y-3 mb-10 text-gray-700">
+              <li>本测试共有{questions.length}条问题，您将有{totalMins}分钟完成所有问题。</li>
+              <li>测试一旦开始了不能中途暂停。</li>
+              <li>本测试要求您尽可能快速和准确完成。</li>
+              <li>资料表单里的资料在测试过程中不会改变。</li>
+              <li>每项陈述的评估仅需一个表单，您需要找到所需表单并参照当中的资料评估陈述。</li>
+              <li>每项陈述只有一个正确答案，您可以更改您的答案。</li>
+              <li>{totalMins}分钟限时完结时测试会自动结束，如要提早完成必须先回答所有问题。</li>
+              <li>当第一条陈述出现时，计时自动开始。</li>
+            </ul>
+          ) : (
+            <ul className="list-disc pl-6 space-y-3 mb-10 text-gray-700">
+              <li>本测试共有{questions.length}条问题，您将有{totalMins}分钟完成所有问题。</li>
+              <li>测试一旦开始了不能中途暂停。</li>
+              <li>本测试要求您尽可能快速和准确完成。</li>
+              <li>{totalMins}分钟限时完结时测试会自动结束，如要提早完成必须先回答所有问题。</li>
+              <li>计时将在您点击下一步时自动开始。</li>
+            </ul>
+          )}
+          
+          <p className="text-gray-600 mb-6">请按'下一步'开始测试。</p>
+          
+          <div className="flex justify-end">
+            <button
+              onClick={handleStartTest}
+              className="bg-[#333333] hover:bg-[#1a1a1a] text-white px-8 py-3 rounded-md font-bold flex items-center transition-colors"
+            >
+              下一步 <ArrowRight className="w-5 h-5 ml-2" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-primary-900 text-white">
