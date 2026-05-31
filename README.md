@@ -1,8 +1,8 @@
 # OpenEmuMapTQ
 
--OpenEmuMapTQ是一个基于React和TypeScript开发的自适应测试平台，提供多种类型的认知挑战题目，包括数字推理、图形推理、语言理解等。
--数据源来自aon官方公布的pdf文档，数据来源合法合规
--献给每一个要面试测评还不知道这玩意咋整的人
+- OpenEmuMapTQ是一个基于React和TypeScript开发的自适应测试平台，提供多种类型的认知挑战题目，包括数字推理、图形推理、语言理解等。
+- 数据源来自aon官方公布的pdf文档，数据来源合法合规，欢迎考后贡献
+- 献给每一个要面试测评还不知道这玩意咋整的人
 ## 功能特点
 
 - **多种挑战类型**：支持Switch Challenge、Grid Challenge、Scales ix、Digit Challenge、Grid Inductive、Verbal和Numerical等多种挑战类型
