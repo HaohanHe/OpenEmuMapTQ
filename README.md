@@ -67,7 +67,7 @@ npm install
 npm run dev        # 起开发服务器
 npm run build      # tsc -b && vite build，产物在 dist/
 npm run preview    # 本地预览生产构建
-npm run check      # tsc --noEmit 类型检查
+npm run check      # tsc -b --noEmit 类型检查
 npm run lint       # ESLint
 ```
 
@@ -144,7 +144,7 @@ npm install
 npm run dev        # 開発サーバ起動
 npm run build      # tsc -b && vite build、成果物は dist/
 npm run preview    # 本番ビルドをローカルでプレビュー
-npm run check      # tsc --noEmit による型チェック
+npm run check      # tsc -b --noEmit による型チェック
 npm run lint       # ESLint
 ```
 
@@ -221,7 +221,7 @@ npm install
 npm run dev        # start the dev server
 npm run build      # tsc -b && vite build, output in dist/
 npm run preview    # preview the production build locally
-npm run check      # tsc --noEmit type check
+npm run check      # tsc -b --noEmit type check
 npm run lint       # ESLint
 ```
 
